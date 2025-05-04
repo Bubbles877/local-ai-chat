@@ -1,12 +1,16 @@
 import asyncio
-from typing import Optional, Callable
+from typing import Optional
 
-from langchain_core.runnables import RunnableLambda
 from langchain_core.language_models.chat_models import BaseChatModel
-from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AnyMessage,
+    HumanMessage,
+    SystemMessage,
+    trim_messages,
+)
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import trim_messages
+from langchain_core.runnables import RunnableLambda
 from loguru import logger
 
 
@@ -29,8 +33,9 @@ class LLMChat:
         self._cfgs = configs
         self._llm = llm
 
-        # self._trimmer: Optional[Callable] = None
-        self._trimmer: Optional[RunnableLambda[list[AnyMessage], list[AnyMessage]]] = None
+        self._trimmer: Optional[RunnableLambda[list[AnyMessage], list[AnyMessage]]] = (
+            None
+        )
         try:
             max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
             if max_msgs >= 0:
@@ -45,12 +50,11 @@ class LLMChat:
                 )
         except ValueError:
             logger.warning(
-                f"Invalid LLM_MAX_MESSAGES value: {max_msgs}. Using default."
+                f"Invalid LLM_MAX_MESSAGES value: {self._cfgs.get('LLM_MAX_MESSAGES')}"
             )
 
         self._instructions: str = ""
         self._msg_example: Optional[list[AnyMessage]] = None
-
 
     def configure(
         self, instructions: str, message_example: Optional[list[AnyMessage]] = None
@@ -84,7 +88,6 @@ class LLMChat:
         msgs: list[AnyMessage] = []
         msgs.append(SystemMessage(content=self._instructions))
 
-        # msgs = self._msg_example if self._msg_example else []
         if self._msg_example is not None:
             msgs.extend(self._msg_example)
         if history is not None:
@@ -94,13 +97,11 @@ class LLMChat:
 
         if self._trimmer:
             msgs = self._trimmer.invoke(msgs)
-            # msgs = self._trimmer(msgs)
-            logger.debug(f"Trimmed messages: {msgs}")
 
-        prompt = ChatPromptTemplate.from_messages(
-            # [SystemMessage(content=self._instructions), *msgs]
-            msgs
-        )
+        # logger.debug(f"Messages: {msgs}")
+        logger.debug(f"Messages: {len(msgs)}")
+
+        prompt = ChatPromptTemplate.from_messages(msgs)
         chain = prompt | self._llm | StrOutputParser()
         result = chain.invoke({})
         return result

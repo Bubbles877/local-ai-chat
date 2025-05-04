@@ -50,21 +50,16 @@ class Main:
         """実行する"""
         instructions = await self._load_instructions()
         msg_example = await self._load_message_example()
-        # logger.debug(f"Instructions: {instructions}")
-        # logger.debug(f"Message example: {msg_example}")
-
         self._llm_chat.configure(instructions, msg_example)
 
         with gr.Blocks() as ui:
             chatbot = gr.Chatbot(type="messages")
             input_field = gr.Textbox()
-            # clear_btn = gr.Button("Clear")
             gr.ClearButton([input_field, chatbot])
 
             input_field.submit(
                 self._chat, [input_field, chatbot], [input_field, chatbot]
             )
-            # clear_btn.click(lambda: None, None, chatbot, queue=False)  # TODO: 不要かも
 
         try:
             ui.launch()
@@ -117,10 +112,6 @@ class Main:
                 content = await f.read()
                 msg_example_dict = dict(json.loads(content))
                 if msgs := msg_example_dict.get("messages"):
-                    # msg_example = [
-                    #     HumanMessage(content=msg["content"]) if msg["role"] == "user" else AIMessage(content=msg["content"])
-                    #     for msg in msgs
-                    # ]
                     for msg in msgs:
                         match msg["role"]:
                             case "user":
@@ -128,7 +119,9 @@ class Main:
                                     HumanMessage(content=str(msg["content"]))
                                 )
                             case "assistant":
-                                msg_example.append(AIMessage(content=str(msg["content"])))
+                                msg_example.append(
+                                    AIMessage(content=str(msg["content"]))
+                                )
                             case "system":
                                 msg_example.append(
                                     SystemMessage(content=str(msg["content"]))
@@ -138,46 +131,14 @@ class Main:
 
         return msg_example
 
-    # def _chat(
-    #     self, user_message: str, history: list[tuple[str, str]]
-    # ) -> tuple[str, list[tuple[str, str]]]:
-    #     # logger.debug(f"Chat: {user_message}")
-    #     # logger.debug(f"History: {history}")
-    #     # logger.debug(f"History length: {len(history)}")
-    #     hist_len = len(history)
-    #     logger.debug(f"{hist_len + 1}: {user_message}")
-
-    #     hist: list[AnyMessage] = []
-
-    #     if history:
-    #         # (ユーザメッセージ, AI メッセージ) のリスト
-    #         for usr_msg, ai_msg in history:
-    #             hist.append(HumanMessage(content=usr_msg))
-    #             hist.append(AIMessage(content=ai_msg))
-
-    #     ai_res = self._llm.invoke(user_message, hist)
-    #     # logger.debug(f"Response: {ai_res}")
-    #     logger.debug(f"{hist_len + 2}: {ai_res}")
-
-    #     history.append((user_message, ai_res))
-    #     # "" を返すと入力ボックスがクリアされる
-    #     return "", history
-
     def _chat(
         self, user_message: str, history: list[gr.MessageDict]
     ) -> tuple[str, list[gr.MessageDict]]:
-        # logger.debug(f"Chat: {user_message}")
-        # logger.debug(f"History: {history}")
         hist_len = len(history)
         logger.debug(f"{hist_len + 1}: (User) {user_message}")
 
         hist: list[AnyMessage] = []
 
-        # if history:
-        #     # (ユーザメッセージ, AI メッセージ) のリスト
-        #     for msg in history:
-        #         hist.append(HumanMessage(content=usr_msg.))
-        #         hist.append(AIMessage(content=ai_msg))
         for msg in history:
             match msg["role"]:
                 case "user":
@@ -190,12 +151,8 @@ class Main:
         ai_res = self._llm_chat.invoke(user_message, hist)
         logger.debug(f"{hist_len + 2}: (AI) {ai_res}")
 
-        # history.append((user_message, ai_res))
-        # history.append({"role": "user", "content": user_message})
-        # history.append({"role": "assistant", "content": ai_res})
         history.append(gr.MessageDict(role="user", content=user_message))
         history.append(gr.MessageDict(role="assistant", content=ai_res))
-
         # "" を返すと入力ボックスがクリアされる
         return "", history
 
