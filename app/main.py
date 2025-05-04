@@ -9,7 +9,7 @@ from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemM
 from langchain_ollama import ChatOllama
 from loguru import logger
 
-from app.llm import LLM
+from util.llm_chat import LLMChat
 
 
 class Main:
@@ -43,12 +43,12 @@ class Main:
             base_url=llm_endpoint,
             temperature=float(temperature) if temperature else None,
         )
-        self._llm = LLM(self._cfgs, llm, enable_logging=log_lv == "DEBUG")
+        self._llm_chat = LLMChat(self._cfgs, llm, enable_logging=log_lv == "DEBUG")
 
     async def run(self) -> None:
         """実行する"""
         instructions = await self._load_instructions()
-        self._llm.configure(instructions)
+        self._llm_chat.configure(instructions)
 
         with gr.Blocks() as ui:
             chatbot = gr.Chatbot(type="messages")
@@ -148,7 +148,7 @@ class Main:
                 case "system":
                     hist.append(SystemMessage(content=str(msg["content"])))
 
-        ai_res = self._llm.invoke(user_message, hist)
+        ai_res = self._llm_chat.invoke(user_message, hist)
         logger.debug(f"{hist_len + 2}: (AI) {ai_res}")
 
         # history.append((user_message, ai_res))

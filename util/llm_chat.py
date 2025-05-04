@@ -8,8 +8,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from loguru import logger
 
 
-class LLM:
-    """LLM"""
+class LLMChat:
+    """LLM チャット"""
 
     def __init__(self, configs: dict, llm: BaseChatModel, enable_logging: bool = False):
         """初期化
