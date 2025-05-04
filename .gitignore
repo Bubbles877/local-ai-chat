@@ -1,0 +1,10 @@
+.venv
+dist
+__pycache__
+*.egg-info
+build
+.env
+*.whl
+
+/log/
+/tmp/
