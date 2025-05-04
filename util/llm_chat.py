@@ -1,10 +1,12 @@
 import asyncio
-from typing import Optional
+from typing import Optional, Callable
 
+from langchain_core.runnables import RunnableLambda
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import trim_messages
 from loguru import logger
 
 
@@ -27,21 +29,28 @@ class LLMChat:
         self._cfgs = configs
         self._llm = llm
 
-        # llm_name = self._cfgs.get("LLM_NAME", "")
-        # llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
-        # temperature = self._cfgs.get("LLM_TEMPERATURE")
-        # logger.debug(f"LLM name: {llm_name}")
-        # logger.debug(f"LLM endpoint: {llm_endpoint}")
-        # logger.debug(f"LLM temperature: {temperature}")
-
-        # self._llm: BaseChatModel = ChatOllama(
-        #     model=llm_name,
-        #     base_url=llm_endpoint,
-        #     temperature=float(temperature) if temperature else None,
-        # )
+        # self._trimmer: Optional[Callable] = None
+        self._trimmer: Optional[RunnableLambda[list[AnyMessage], list[AnyMessage]]] = None
+        try:
+            max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
+            if max_msgs >= 0:
+                # システムメッセージ含めて max_msgs 件残す
+                self._trimmer = trim_messages(
+                    max_tokens=max_msgs,
+                    token_counter=len,
+                    strategy="last",
+                    allow_partial=False,
+                    # start_on=HumanMessage,
+                    include_system=True,
+                )
+        except ValueError:
+            logger.warning(
+                f"Invalid LLM_MAX_MESSAGES value: {max_msgs}. Using default."
+            )
 
         self._instructions: str = ""
         self._msg_example: Optional[list[AnyMessage]] = None
+
 
     def configure(
         self, instructions: str, message_example: Optional[list[AnyMessage]] = None
@@ -58,7 +67,6 @@ class LLMChat:
         logger.debug(f"Instructions: {self._instructions}")
         logger.debug(f"Message example: {self._msg_example}")
 
-    # TODO: predict?
     def invoke(
         self,
         message: Optional[str] = None,
@@ -73,18 +81,25 @@ class LLMChat:
         Returns:
             str: 結果
         """
-        # logger.debug("Invoke")
+        msgs: list[AnyMessage] = []
+        msgs.append(SystemMessage(content=self._instructions))
 
-        msgs = self._msg_example if self._msg_example else []
-
+        # msgs = self._msg_example if self._msg_example else []
+        if self._msg_example is not None:
+            msgs.extend(self._msg_example)
         if history is not None:
             msgs.extend(history)
-
         if message:
             msgs.append(HumanMessage(content=message))
 
+        if self._trimmer:
+            msgs = self._trimmer.invoke(msgs)
+            # msgs = self._trimmer(msgs)
+            logger.debug(f"Trimmed messages: {msgs}")
+
         prompt = ChatPromptTemplate.from_messages(
-            [SystemMessage(content=self._instructions), *msgs]
+            # [SystemMessage(content=self._instructions), *msgs]
+            msgs
         )
         chain = prompt | self._llm | StrOutputParser()
         result = chain.invoke({})
