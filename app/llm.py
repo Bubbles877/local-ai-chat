@@ -5,18 +5,18 @@ from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import ChatOllama
 from loguru import logger
 
 
 class LLM:
     """LLM"""
 
-    def __init__(self, configs: dict, enable_logging: bool = False):
+    def __init__(self, configs: dict, llm: BaseChatModel, enable_logging: bool = False):
         """初期化
 
         Args:
             configs (dict): 設定
+            llm (BaseChatModel): LLM
             enable_logging (bool, optional): ログ出力を有効にするかどうか, Defaults to False.
         """
         if enable_logging:
@@ -24,23 +24,24 @@ class LLM:
         else:
             logger.disable(__name__)
 
-        self._configs = configs
+        self._cfgs = configs
+        self._llm = llm
 
-        llm_name = self._configs.get("LLM_NAME", "")
-        llm_endpoint = self._configs.get("LLM_ENDPOINT")
-        temperature = self._configs.get("LLM_TEMPERATURE")
-        logger.debug(f"LLM name: {llm_name}")
-        logger.debug(f"LLM endpoint: {llm_endpoint}")
-        logger.debug(f"LLM temperature: {temperature}")
+        # llm_name = self._cfgs.get("LLM_NAME", "")
+        # llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
+        # temperature = self._cfgs.get("LLM_TEMPERATURE")
+        # logger.debug(f"LLM name: {llm_name}")
+        # logger.debug(f"LLM endpoint: {llm_endpoint}")
+        # logger.debug(f"LLM temperature: {temperature}")
 
-        self._llm: BaseChatModel = ChatOllama(
-            model=llm_name,
-            base_url=llm_endpoint,
-            temperature=float(temperature) if temperature else None,
-        )
+        # self._llm: BaseChatModel = ChatOllama(
+        #     model=llm_name,
+        #     base_url=llm_endpoint,
+        #     temperature=float(temperature) if temperature else None,
+        # )
 
         self._instructions: str = ""
-        self._message_example: Optional[list[AnyMessage]] = None
+        self._msg_example: Optional[list[AnyMessage]] = None
 
     def configure(
         self, instructions: str, message_example: Optional[list[AnyMessage]] = None
@@ -52,11 +53,12 @@ class LLM:
             message_example (Optional[list[AnyMessage]]): メッセージの例
         """
         self._instructions = instructions
-        self._message_example = message_example
+        self._msg_example = message_example
 
         logger.debug(f"Instructions: {self._instructions}")
-        logger.debug(f"Message example: {self._message_example}")
+        logger.debug(f"Message example: {self._msg_example}")
 
+    # TODO: predict?
     def invoke(
         self,
         message: Optional[str] = None,
@@ -71,9 +73,9 @@ class LLM:
         Returns:
             str: 結果
         """
-        logger.debug("Invoke")
+        # logger.debug("Invoke")
 
-        msgs = self._message_example if self._message_example else []
+        msgs = self._msg_example if self._msg_example else []
 
         if history is not None:
             msgs.extend(history)

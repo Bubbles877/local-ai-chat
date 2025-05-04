@@ -6,6 +6,7 @@ import aiofiles
 import gradio as gr
 from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
+from langchain_ollama import ChatOllama
 from loguru import logger
 
 from app.llm import LLM
@@ -30,7 +31,19 @@ class Main:
             retention="7 days",
         )
 
-        self._llm = LLM(self._cfgs, enable_logging=log_lv == "DEBUG")
+        llm_name = self._cfgs.get("LLM_NAME", "")
+        llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
+        temperature = self._cfgs.get("LLM_TEMPERATURE")
+        logger.debug(f"LLM name: {llm_name}")
+        logger.debug(f"LLM endpoint: {llm_endpoint}")
+        logger.debug(f"LLM temperature: {temperature}")
+
+        llm = ChatOllama(
+            model=llm_name,
+            base_url=llm_endpoint,
+            temperature=float(temperature) if temperature else None,
+        )
+        self._llm = LLM(self._cfgs, llm, enable_logging=log_lv == "DEBUG")
 
     async def run(self) -> None:
         """実行する"""
