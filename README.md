@@ -30,6 +30,8 @@
 - LLM_MESSAGE_EXAMPLE_FILE_PATH
   - User と AI のメッセージ例のファイルのパス (e.g. `data/llm_message_example.json`)
   - 先行するメッセージとして会話履歴に含められる
+- LLM_TEMPERATURE
+  - LLM が生成する出力のランダム性、創造性 (0.0-1.0)
 - LLM_MAX_MESSAGES
   - 会話履歴の最大数 (<0: 無制限)
   - より新しいメッセージを優先に最大数まで LLM に渡す
