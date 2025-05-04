@@ -9,6 +9,7 @@ license = {text = "Apache-2.0"}
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 dependencies = [
+    "aiofiles (>=24.1.0,<25.0.0)",
     "gradio (>=5.29.0,<6.0.0)",
     "langchain (>=0.3.24,<0.4.0)",
     "langchain-core (>=0.3.57,<0.4.0)",
@@ -21,3 +22,7 @@ dependencies = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+types-aiofiles = "^24.1.0.20250326"
+
