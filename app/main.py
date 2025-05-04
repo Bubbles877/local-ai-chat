@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import sys
 
@@ -48,7 +49,11 @@ class Main:
     async def run(self) -> None:
         """実行する"""
         instructions = await self._load_instructions()
-        self._llm_chat.configure(instructions)
+        msg_example = await self._load_message_example()
+        # logger.debug(f"Instructions: {instructions}")
+        # logger.debug(f"Message example: {msg_example}")
+
+        self._llm_chat.configure(instructions, msg_example)
 
         with gr.Blocks() as ui:
             chatbot = gr.Chatbot(type="messages")
@@ -98,6 +103,40 @@ class Main:
             logger.error(f"Failed to load instructions: {e}")
 
         return instructions
+
+    async def _load_message_example(self) -> list[AnyMessage]:
+        msg_example: list[AnyMessage] = []
+
+        file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
+        if not os.path.isfile(file_path):
+            logger.warning(f"Message example file not found: {file_path}")
+            return msg_example
+
+        try:
+            async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+                content = await f.read()
+                msg_example_dict = dict(json.loads(content))
+                if msgs := msg_example_dict.get("messages"):
+                    # msg_example = [
+                    #     HumanMessage(content=msg["content"]) if msg["role"] == "user" else AIMessage(content=msg["content"])
+                    #     for msg in msgs
+                    # ]
+                    for msg in msgs:
+                        match msg["role"]:
+                            case "user":
+                                msg_example.append(
+                                    HumanMessage(content=str(msg["content"]))
+                                )
+                            case "assistant":
+                                msg_example.append(AIMessage(content=str(msg["content"])))
+                            case "system":
+                                msg_example.append(
+                                    SystemMessage(content=str(msg["content"]))
+                                )
+        except Exception as e:
+            logger.error(f"Failed to load message example: {e}")
+
+        return msg_example
 
     # def _chat(
     #     self, user_message: str, history: list[tuple[str, str]]
