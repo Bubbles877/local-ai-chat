@@ -17,6 +17,17 @@ class UI:
         instructions: str,
         on_setting_updated: Callable[[str], None],
     ):
+        """初期化
+
+        Args:
+            message_example (list[gr.MessageDict]): ユーザーと AI の会話例
+            chat_callback (Callable[ [str, list[gr.MessageDict]], tuple[str, list[gr.MessageDict]] ]): 会話のコールバック
+            llm_name (str): LLM 名
+            llm_temperature (str): LLM が生成する出力のランダム性、創造性
+            llm_max_msgs (int): LLM に渡す会話履歴の最大数
+            instructions (str): 指示
+            on_setting_updated (Callable[[str], None]): 設定更新のコールバック
+        """
         self._msg_example = message_example
         self._chat_callback = chat_callback
         self._llm_name = llm_name
@@ -26,6 +37,7 @@ class UI:
         self._setting_updated_callback = on_setting_updated
 
     def launch(self) -> None:
+        """UI を起動する"""
         with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
             gr.Markdown("## 💬 Local AI Chat")
 
