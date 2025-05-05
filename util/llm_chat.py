@@ -50,24 +50,15 @@ class LLMChat:
             )
 
         self._instructions: str = ""
-        # self._msg_example: Optional[list[AnyMessage]] = None
 
-    def configure(
-        self,
-        instructions: str,  # message_example: Optional[list[AnyMessage]] = None
-    ) -> None:
+    def configure(self, instructions: str) -> None:
         """設定する
 
         Args:
             instructions (str): 指示
-            #message_example (Optional[list[AnyMessage]]): ユーザーと AI の会話例
         """
         self._instructions = instructions
         logger.debug(f"Instructions: {self._instructions}")
-
-        # if message_example:
-        #     self._msg_example = message_example
-        #     logger.debug(f"Message example: {self._msg_example}")
 
     def invoke(
         self, message: Optional[str] = None, history: Optional[list[AnyMessage]] = None
@@ -81,17 +72,6 @@ class LLMChat:
         Returns:
             str: LLM の応答メッセージ
         """
-        # msgs: list[AnyMessage] = []
-        # msgs.append(SystemMessage(content=self._instructions))
-
-        # # if self._msg_example is not None:
-        # #     msgs.extend(self._msg_example)
-        # if history is not None:
-        #     msgs.extend(history)
-        # if message:
-        #     msgs.append(HumanMessage(content=message))
-        # if self._msgs_trimmer:
-        #     msgs = self._msgs_trimmer.invoke(msgs)
         msgs = self._build_messages(message, history)
         logger.debug(f"Input messages: {len(msgs)}")
 

@@ -59,7 +59,6 @@ class Main:
         """実行する"""
         instructions = await self._load_instructions()
         msg_example = await self._load_message_example()
-        # self._llm_chat.configure(instructions, msg_example)
         self._llm_chat.configure(instructions)
 
         with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
@@ -105,7 +104,6 @@ class Main:
                 with gr.Column(scale=4):
                     chatbot = gr.Chatbot(
                         value=msg_example,
-                        # value=cast(list[gr.MessageDict | Message], msg_example),
                         type="messages",
                         label="History",
                         container=True,
@@ -154,35 +152,6 @@ class Main:
             logger.error(f"Failed to load instructions: {e}")
 
         return instructions
-
-    # async def _load_message_example(self) -> list[AnyMessage]:
-    #     msg_example: list[AnyMessage] = []
-
-    #     file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
-    #     if not os.path.isfile(file_path):
-    #         logger.warning(f"Message example file not found: {file_path}")
-    #         return msg_example
-
-    #     try:
-    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-    #             msg_example_dict: dict = json.loads(await f.read())
-    #             msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
-    #             for msg in msgs:
-    #                 role = msg.get("role")
-    #                 content = msg.get("content", "")
-    #                 match role:
-    #                     case "user":
-    #                         msg_example.append(HumanMessage(content=content))
-    #                     case "assistant":
-    #                         msg_example.append(AIMessage(content=content))
-    #                     case "system":
-    #                         msg_example.append(SystemMessage(content=content))
-    #                     case _:
-    #                         logger.warning(f"Unknown role: {role}")
-    #     except Exception as e:
-    #         logger.error(f"Failed to load message example: {e}")
-
-    #     return msg_example
 
     async def _load_message_example(self) -> list[gr.MessageDict | Message]:
         msg_example: list[gr.MessageDict | Message] = []
