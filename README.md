@@ -3,8 +3,8 @@
 ## 1. 概要
 
 - ローカル AI チャットアプリ (Local AI Chat App)
-- [Ollama](https://github.com/ollama/ollama) を利用しています (Using Ollama)
-- 外部には一切データを送信しないローカル専用アプリです (Local-only app that never sends any data externally)
+- [Ollama](https://github.com/ollama/ollama)、[Gradio](https://www.gradio.app/) を利用 (Built with Ollama and Gradio)
+- 外部には一切データを送信しないローカル専用アプリです (local-only, no external data transfer)
 
 ![UI](images/ui.png)
 
@@ -27,13 +27,13 @@
   - LLM 名 (e.g. qwen2.5:32b)
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
+- LLM_TEMPERATURE
+  - LLM が生成する出力のランダム性、創造性 (0.0-1.0)
 - LLM_INSTRUCTION_FILE_PATH
   - LLM のシステムプロンプト設定ファイルのパス (e.g. `data/llm_instruction.txt`)
 - LLM_MESSAGE_EXAMPLE_FILE_PATH
   - ユーザーと AI の会話例のファイルのパス (e.g. `data/llm_message_example.json`)
   - 先行するメッセージとして会話履歴に含められる
-- LLM_TEMPERATURE
-  - LLM が生成する出力のランダム性、創造性 (0.0-1.0)
 - LLM_MAX_MESSAGES
   - LLM に渡す会話履歴の最大数 (<0: 無制限)
   - より新しいメッセージを優先に最大数まで渡す
