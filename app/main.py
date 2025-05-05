@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import sys
-from typing import TypedDict
+from typing import TypedDict, cast
 
 import aiofiles
 import gradio as gr
@@ -58,8 +58,15 @@ class Main:
     async def run(self) -> None:
         """実行する"""
         instructions = await self._load_instructions()
-        msg_example = await self._load_message_example()
         self._llm_chat.configure(instructions)
+
+        # msg_example: list[gr.MessageDict | Message] = [
+        #     *await self._load_message_example()
+        # ]
+        # msg_example = cast(
+        #     list[gr.MessageDict | Message], await self._load_message_example()
+        # )
+        msg_example = await self._load_message_example()
 
         with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
             gr.Markdown("## 💬 Local AI Chat")
@@ -97,13 +104,14 @@ class Main:
                             interactive=True,
                         )
                         gr.Button("Update").click(
-                            lambda x: self._llm_chat.configure(x),
+                            lambda txt: self._llm_chat.configure(txt),
                             inputs=instructions_box,
                         )
 
                 with gr.Column(scale=4):
                     chatbot = gr.Chatbot(
-                        value=msg_example,
+                        # value=msg_example,
+                        cast(list[gr.MessageDict | Message], msg_example),
                         type="messages",
                         label="History",
                         container=True,
@@ -153,8 +161,10 @@ class Main:
 
         return instructions
 
-    async def _load_message_example(self) -> list[gr.MessageDict | Message]:
-        msg_example: list[gr.MessageDict | Message] = []
+    # async def _load_message_example(self) -> list[gr.MessageDict | Message]:
+    #     msg_example: list[gr.MessageDict | Message] = []
+    async def _load_message_example(self) -> list[gr.MessageDict]:
+        msg_example: list[gr.MessageDict] = []
 
         file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
         if not os.path.isfile(file_path):
@@ -165,24 +175,26 @@ class Main:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
                 msg_example_dict: dict = json.loads(await f.read())
                 msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
-                for msg in msgs:
-                    role = msg.get("role")
-                    content = msg.get("content", "")
-                    match role:
-                        case "user":
-                            msg_example.append(
-                                gr.MessageDict(role="user", content=content)
-                            )
-                        case "assistant":
-                            msg_example.append(
-                                gr.MessageDict(role="assistant", content=content)
-                            )
-                        case "system":
-                            msg_example.append(
-                                gr.MessageDict(role="system", content=content)
-                            )
-                        case _:
-                            logger.warning(f"Unknown role: {role}")
+                # for msg in msgs:
+                #     role = msg.get("role")
+                #     content = msg.get("content", "")
+                #     match role:
+                #         case "user":
+                #             msg_example.append(
+                #                 gr.MessageDict(role="user", content=content)
+                #             )
+                #         case "assistant":
+                #             msg_example.append(
+                #                 gr.MessageDict(role="assistant", content=content)
+                #             )
+                #         case "system":
+                #             msg_example.append(
+                #                 gr.MessageDict(role="system", content=content)
+                #             )
+                #         case _:
+                #             logger.warning(f"Unknown role: {role}")
+                # msg_example = [*self._to_ui_message(msgs)]
+                msg_example = self._to_ui_message(msgs)
         except Exception as e:
             logger.error(f"Failed to load message example: {e}")
 
@@ -194,17 +206,18 @@ class Main:
         hist_len = len(history)
         logger.debug(f"{hist_len + 1}: (User) {user_message}")
 
-        hist: list[AnyMessage] = []
+        # hist: list[AnyMessage] = []
 
-        for msg in history:
-            match msg["role"]:
-                case "user":
-                    hist.append(HumanMessage(content=str(msg["content"])))
-                case "assistant":
-                    hist.append(AIMessage(content=str(msg["content"])))
-                case "system":
-                    hist.append(SystemMessage(content=str(msg["content"])))
-
+        # for msg in history:
+        #     match msg["role"]:
+        #         case "user":
+        #             hist.append(HumanMessage(content=str(msg["content"])))
+        #         case "assistant":
+        #             hist.append(AIMessage(content=str(msg["content"])))
+        #         case "system":
+        #             hist.append(SystemMessage(content=str(msg["content"])))
+        # hist: list[AnyMessage] = [self._to_llm_message(msg) for msg in history]
+        hist = self._to_llm_messages(history)
         ai_res = self._llm_chat.invoke(user_message, hist)
         logger.debug(f"{hist_len + 2}: (AI) {ai_res}")
 
@@ -212,6 +225,46 @@ class Main:
         history.append(gr.MessageDict(role="assistant", content=ai_res))
         # "" を返すと入力ボックスがクリアされる
         return "", history
+
+    # def _to_llm_message(self, msg: gr.MessageDict) -> AnyMessage:
+    #     return {
+    #         "user": HumanMessage,
+    #         "assistant": AIMessage,
+    #         "system": SystemMessage,
+    #     }.get(msg["role"], HumanMessage)(content=str(msg["content"]))
+
+    def _to_ui_message(self, messages: list[ExampleMessage]) -> list[gr.MessageDict]:
+        msgs: list[gr.MessageDict] = []
+
+        for msg in messages:
+            role = msg.get("role", "")
+            match role:
+                case "user" | "assistant" | "system":
+                    msgs.append(
+                        gr.MessageDict(role=role, content=msg.get("content", ""))
+                    )
+                case _:
+                    logger.warning(f"Unknown role: {role}")
+
+        return msgs
+
+    def _to_llm_messages(self, messages: list[gr.MessageDict]) -> list[AnyMessage]:
+        msgs: list[AnyMessage] = []
+
+        for msg in messages:
+            role = msg["role"]
+            content = str(msg["content"])
+            match role:
+                case "user":
+                    msgs.append(HumanMessage(content=content))
+                case "assistant":
+                    msgs.append(AIMessage(content=content))
+                case "system":
+                    msgs.append(SystemMessage(content=content))
+                case _:
+                    logger.warning(f"Unknown role: {role}")
+
+        return msgs
 
 
 if __name__ == "__main__":
