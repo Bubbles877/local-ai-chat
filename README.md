@@ -43,7 +43,7 @@
 ### 2.2. プログラムの実行
 
 ```sh
-poetry run python .\app\main.py
+poetry run python app/main.py
 ```
 
 ## 3. リポジトリ
