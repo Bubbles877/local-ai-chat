@@ -18,16 +18,11 @@ class LLMChat:
     """LLM チャット"""
 
     def __init__(
-        self,
-        #  configs: dict,
-        llm: BaseChatModel,
-        max_messages: int,
-        enable_logging: bool = False,
+        self, llm: BaseChatModel, max_messages: int, enable_logging: bool = False
     ):
         """初期化
 
         Args:
-            # configs (dict): 設定
             llm (BaseChatModel): LLM
             max_messages (int): LLM に渡す会話履歴の最大数 (<0: 無制限)
             enable_logging (bool, optional): ログ出力を有効にするかどうか, Defaults to False.
@@ -37,28 +32,12 @@ class LLMChat:
         else:
             logger.disable(__name__)
 
-        # self._cfgs = configs
         self._llm = llm
 
         self._msgs_trimmer: Optional[
             RunnableLambda[list[AnyMessage], list[AnyMessage]]
         ] = None
-        # try:
-        #     max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
-        #     if max_msgs >= 0:
-        #         # システムメッセージ含めて max_msgs 件残す
-        #         self._trimmer = trim_messages(
-        #             max_tokens=max_msgs,
-        #             token_counter=len,
-        #             strategy="last",
-        #             allow_partial=False,
-        #             # start_on=HumanMessage,
-        #             include_system=True,
-        #         )
-        # except ValueError:
-        #     logger.warning(
-        #         f"Invalid LLM_MAX_MESSAGES value: {self._cfgs.get('LLM_MAX_MESSAGES')}"
-        #     )
+
         if max_messages >= 0:
             # システムメッセージ含めて max_messages 件残す
             self._msgs_trimmer = trim_messages(
@@ -66,7 +45,6 @@ class LLMChat:
                 token_counter=len,
                 strategy="last",
                 allow_partial=False,
-                # start_on=HumanMessage,
                 include_system=True,
             )
 
@@ -80,7 +58,7 @@ class LLMChat:
 
         Args:
             instructions (str): 指示
-            message_example (Optional[list[AnyMessage]]): メッセージの例
+            message_example (Optional[list[AnyMessage]]): ユーザーと AI の会話例
         """
         self._instructions = instructions
         logger.debug(f"Instructions: {self._instructions}")
@@ -90,9 +68,7 @@ class LLMChat:
             logger.debug(f"Message example: {self._msg_example}")
 
     def invoke(
-        self,
-        message: Optional[str] = None,
-        history: Optional[list[AnyMessage]] = None,
+        self, message: Optional[str] = None, history: Optional[list[AnyMessage]] = None
     ) -> str:
         """LLM を呼び出す
 
@@ -116,8 +92,7 @@ class LLMChat:
         if self._msgs_trimmer:
             msgs = self._msgs_trimmer.invoke(msgs)
 
-        # logger.debug(f"Messages: {msgs}")
-        logger.debug(f"Messages: {len(msgs)}")
+        logger.debug(f"Input messages: {len(msgs)}")
 
         prompt = ChatPromptTemplate.from_messages(msgs)
         chain = prompt | self._llm | StrOutputParser()
@@ -125,15 +100,13 @@ class LLMChat:
         return result
 
     async def ainvoke(
-        self,
-        history: list[AnyMessage],
-        message: Optional[str] = None,
+        self, history: list[AnyMessage], message: Optional[str] = None
     ) -> str:
         """LLM を呼び出す (非同期)
 
         Args:
             message (Optional[str]): メッセージ
-            history (list[AnyMessage]): 会話履歴
+            history (Optional[list[AnyMessage]]): 会話履歴
 
         Returns:
             str: 結果

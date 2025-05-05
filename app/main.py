@@ -39,7 +39,6 @@ class Main:
         self._llm_name = self._cfgs.get("LLM_NAME", "")
         self._llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
         self._llm_temperature = self._cfgs.get("LLM_TEMPERATURE")
-        # self._llm_max_msgs = self._cfgs.get("LLM_MAX_MESSAGES", -1)
         self._llm_max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
         logger.debug(f"LLM name: {self._llm_name}")
         logger.debug(f"LLM endpoint: {self._llm_endpoint}")
@@ -52,10 +51,7 @@ class Main:
             temperature=float(self._llm_temperature) if self._llm_temperature else None,
         )
         self._llm_chat = LLMChat(
-            # self._cfgs,
-            llm,
-            self._llm_max_msgs,
-            enable_logging=log_lv == "DEBUG",
+            llm, self._llm_max_msgs, enable_logging=log_lv == "DEBUG"
         )
 
     async def run(self) -> None:
@@ -64,17 +60,7 @@ class Main:
         msg_example = await self._load_message_example()
         self._llm_chat.configure(instructions, msg_example)
 
-        with gr.Blocks(
-            # title="AI Chat", css=".chatbot {height:1000px; overflow:auto;}"
-            # theme=gr.themes.Citrus(),
-            # theme=gr.themes.Default(),
-            # theme=gr.themes.Glass(),
-            # theme=gr.themes.Monochrome(),
-            theme=gr.themes.Ocean(),
-            # theme=gr.themes.Origin(),
-            # theme=gr.themes.Soft(),
-            title="AI Chat",
-        ) as ui:
+        with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
             gr.Markdown("## 💬 Local AI Chat")
 
             with gr.Row():
@@ -112,21 +98,14 @@ class Main:
                         gr.Button("Update").click(
                             lambda x: self._llm_chat.configure(x),
                             inputs=instructions_box,
-                            # outputs=instructions_box,
                         )
 
                 with gr.Column(scale=4):
                     chatbot = gr.Chatbot(
-                        type="messages",
-                        label="History",
-                        container=True,
-                        height=500,
-                        # elem_id="chatbot",
-                        # elem_classes="chatbot",
+                        type="messages", label="History", container=True, height=500
                     )
                     input_box = gr.Textbox(
-                        placeholder="Shift + Enter で改行",
-                        show_label=False,
+                        placeholder="Shift + Enter で改行", show_label=False
                     )
                     gr.ClearButton([input_box, chatbot])
 
@@ -134,12 +113,7 @@ class Main:
                         self._chat, [input_box, chatbot], [input_box, chatbot]
                     )
 
-        # try:
-        #     ui.launch(inbrowser=True, share=False)
-        # except KeyboardInterrupt:
-        #     logger.info("KeyboardInterrupt: Shutting down...")
         ui.launch(inbrowser=True, share=False)
-
         ui.close()
 
     def _load_env_vars(self) -> dict[str, str]:
@@ -184,10 +158,7 @@ class Main:
 
         try:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-                content = await f.read()
-                # msg_example_dict = dict(json.loads(content))
-                msg_example_dict: dict = json.loads(content)
-                # if msgs := msg_example_dict.get("messages"):
+                msg_example_dict: dict = json.loads(await f.read())
                 msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
                 for msg in msgs:
                     role = msg.get("role")
