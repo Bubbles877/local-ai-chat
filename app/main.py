@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import sys
+from typing import TypedDict
 
 import aiofiles
 import gradio as gr
@@ -13,12 +14,15 @@ from loguru import logger
 from util.llm_chat import LLMChat
 
 
+class ExampleMessage(TypedDict):
+    role: str
+    content: str
+
+
 class Main:
     def __init__(self):
-        self._cfgs: dict[str, str] = {}
-
         load_dotenv(verbose=True)
-        self._load_env_vars()
+        self._cfgs = self._load_env_vars()
 
         log_lv = self._cfgs.get("LOG_LEVEL", "INFO")
         logger.remove()  # default: stderr
@@ -68,8 +72,8 @@ class Main:
 
         ui.close()
 
-    def _load_env_vars(self) -> None:
-        self._cfgs = {
+    def _load_env_vars(self) -> dict[str, str]:
+        cfgs = {
             var: val
             for var in [
                 "LLM_NAME",
@@ -82,6 +86,7 @@ class Main:
             ]
             if (val := os.getenv(var)) is not None
         }
+        return cfgs
 
     async def _load_instructions(self) -> str:
         instructions = ""
@@ -110,22 +115,22 @@ class Main:
         try:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
                 content = await f.read()
-                msg_example_dict = dict(json.loads(content))
-                if msgs := msg_example_dict.get("messages"):
-                    for msg in msgs:
-                        match msg["role"]:
-                            case "user":
-                                msg_example.append(
-                                    HumanMessage(content=str(msg["content"]))
-                                )
-                            case "assistant":
-                                msg_example.append(
-                                    AIMessage(content=str(msg["content"]))
-                                )
-                            case "system":
-                                msg_example.append(
-                                    SystemMessage(content=str(msg["content"]))
-                                )
+                # msg_example_dict = dict(json.loads(content))
+                msg_example_dict: dict = json.loads(content)
+                # if msgs := msg_example_dict.get("messages"):
+                msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
+                for msg in msgs:
+                    role = msg.get("role")
+                    content = msg.get("content", "")
+                    match role:
+                        case "user":
+                            msg_example.append(HumanMessage(content=content))
+                        case "assistant":
+                            msg_example.append(AIMessage(content=content))
+                        case "system":
+                            msg_example.append(SystemMessage(content=content))
+                        case _:
+                            logger.warning(f"Unknown role: {role}")
         except Exception as e:
             logger.error(f"Failed to load message example: {e}")
 
