@@ -7,6 +7,7 @@ from typing import TypedDict
 import aiofiles
 import gradio as gr
 from dotenv import load_dotenv
+from gradio.components.chatbot import Message
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from loguru import logger
@@ -58,7 +59,8 @@ class Main:
         """実行する"""
         instructions = await self._load_instructions()
         msg_example = await self._load_message_example()
-        self._llm_chat.configure(instructions, msg_example)
+        # self._llm_chat.configure(instructions, msg_example)
+        self._llm_chat.configure(instructions)
 
         with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
             gr.Markdown("## 💬 Local AI Chat")
@@ -102,7 +104,12 @@ class Main:
 
                 with gr.Column(scale=4):
                     chatbot = gr.Chatbot(
-                        type="messages", label="History", container=True, height=500
+                        value=msg_example,
+                        # value=cast(list[gr.MessageDict | Message], msg_example),
+                        type="messages",
+                        label="History",
+                        container=True,
+                        height=500,
                     )
                     input_box = gr.Textbox(
                         placeholder="Shift + Enter で改行", show_label=False
@@ -148,8 +155,37 @@ class Main:
 
         return instructions
 
-    async def _load_message_example(self) -> list[AnyMessage]:
-        msg_example: list[AnyMessage] = []
+    # async def _load_message_example(self) -> list[AnyMessage]:
+    #     msg_example: list[AnyMessage] = []
+
+    #     file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
+    #     if not os.path.isfile(file_path):
+    #         logger.warning(f"Message example file not found: {file_path}")
+    #         return msg_example
+
+    #     try:
+    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+    #             msg_example_dict: dict = json.loads(await f.read())
+    #             msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
+    #             for msg in msgs:
+    #                 role = msg.get("role")
+    #                 content = msg.get("content", "")
+    #                 match role:
+    #                     case "user":
+    #                         msg_example.append(HumanMessage(content=content))
+    #                     case "assistant":
+    #                         msg_example.append(AIMessage(content=content))
+    #                     case "system":
+    #                         msg_example.append(SystemMessage(content=content))
+    #                     case _:
+    #                         logger.warning(f"Unknown role: {role}")
+    #     except Exception as e:
+    #         logger.error(f"Failed to load message example: {e}")
+
+    #     return msg_example
+
+    async def _load_message_example(self) -> list[gr.MessageDict | Message]:
+        msg_example: list[gr.MessageDict | Message] = []
 
         file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
         if not os.path.isfile(file_path):
@@ -165,11 +201,17 @@ class Main:
                     content = msg.get("content", "")
                     match role:
                         case "user":
-                            msg_example.append(HumanMessage(content=content))
+                            msg_example.append(
+                                gr.MessageDict(role="user", content=content)
+                            )
                         case "assistant":
-                            msg_example.append(AIMessage(content=content))
+                            msg_example.append(
+                                gr.MessageDict(role="assistant", content=content)
+                            )
                         case "system":
-                            msg_example.append(SystemMessage(content=content))
+                            msg_example.append(
+                                gr.MessageDict(role="system", content=content)
+                            )
                         case _:
                             logger.warning(f"Unknown role: {role}")
         except Exception as e:
