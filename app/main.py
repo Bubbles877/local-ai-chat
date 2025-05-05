@@ -2,16 +2,16 @@ import asyncio
 import json
 import os
 import sys
-from typing import TypedDict, cast
+from typing import TypedDict
 
 import aiofiles
 import gradio as gr
 from dotenv import load_dotenv
-from gradio.components.chatbot import Message
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from loguru import logger
 
+from app.ui import UI
 from util.llm_chat import LLMChat
 
 
@@ -62,65 +62,75 @@ class Main:
 
         msg_example = await self._load_message_example()
 
-        with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
-            gr.Markdown("## 💬 Local AI Chat")
+        # with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
+        #     gr.Markdown("## 💬 Local AI Chat")
 
-            with gr.Row():
-                with gr.Column(scale=1):
-                    with gr.Accordion("Settings", open=False):
-                        with gr.Column():
-                            gr.Textbox(
-                                label="LLM Name",
-                                value=self._llm_name,
-                                lines=1,
-                                max_lines=1,
-                                interactive=False,
-                            )
-                            gr.Textbox(
-                                label="Temperature",
-                                value=self._llm_temperature,
-                                lines=1,
-                                max_lines=1,
-                                interactive=False,
-                            )
-                            gr.Textbox(
-                                label="Max Messages",
-                                value=str(self._llm_max_msgs),
-                                lines=1,
-                                max_lines=1,
-                                interactive=False,
-                            )
-                        instructions_box = gr.Textbox(
-                            label="Instructions (editable)",
-                            value=instructions,
-                            lines=10,
-                            max_lines=20,
-                            interactive=True,
-                        )
-                        gr.Button("Update").click(
-                            lambda txt: self._llm_chat.configure(txt),
-                            inputs=instructions_box,
-                        )
+        #     with gr.Row():
+        #         with gr.Column(scale=1):
+        #             with gr.Accordion("Settings", open=False):
+        #                 with gr.Column():
+        #                     gr.Textbox(
+        #                         label="LLM Name",
+        #                         value=self._llm_name,
+        #                         lines=1,
+        #                         max_lines=1,
+        #                         interactive=False,
+        #                     )
+        #                     gr.Textbox(
+        #                         label="Temperature",
+        #                         value=self._llm_temperature,
+        #                         lines=1,
+        #                         max_lines=1,
+        #                         interactive=False,
+        #                     )
+        #                     gr.Textbox(
+        #                         label="Max Messages",
+        #                         value=str(self._llm_max_msgs),
+        #                         lines=1,
+        #                         max_lines=1,
+        #                         interactive=False,
+        #                     )
+        #                 instructions_box = gr.Textbox(
+        #                     label="Instructions (editable)",
+        #                     value=instructions,
+        #                     lines=10,
+        #                     max_lines=20,
+        #                     interactive=True,
+        #                 )
+        #                 gr.Button("Update").click(
+        #                     lambda txt: self._llm_chat.configure(txt),
+        #                     inputs=instructions_box,
+        #                 )
 
-                with gr.Column(scale=4):
-                    chatbot = gr.Chatbot(
-                        cast(list[gr.MessageDict | Message], msg_example),
-                        type="messages",
-                        label="History",
-                        container=True,
-                        height=500,
-                    )
-                    input_box = gr.Textbox(
-                        placeholder="Shift + Enter で改行", show_label=False
-                    )
-                    gr.ClearButton([input_box, chatbot])
+        #         with gr.Column(scale=4):
+        #             chatbot = gr.Chatbot(
+        #                 cast(list[gr.MessageDict | Message], msg_example),
+        #                 type="messages",
+        #                 label="History",
+        #                 container=True,
+        #                 height=500,
+        #             )
+        #             input_box = gr.Textbox(
+        #                 placeholder="Shift + Enter で改行", show_label=False
+        #             )
+        #             gr.ClearButton([input_box, chatbot])
 
-                    input_box.submit(
-                        self._chat, [input_box, chatbot], [input_box, chatbot]
-                    )
+        #             input_box.submit(
+        #                 self._chat, [input_box, chatbot], [input_box, chatbot]
+        #             )
 
-        ui.launch(inbrowser=True, share=False)
-        ui.close()
+        # ui.launch(inbrowser=True, share=False)
+        # ui.close()
+        ui = UI(
+            msg_example,
+            self._chat,
+            self._llm_name,
+            self._llm_temperature if self._llm_temperature else "",
+            self._llm_max_msgs,
+            instructions,
+            self._llm_chat.configure,
+        )
+        ui.launch()
 
     def _load_env_vars(self) -> dict[str, str]:
         cfgs = {
@@ -128,9 +138,9 @@ class Main:
             for var in [
                 "LLM_NAME",
                 "LLM_ENDPOINT",
+                "LLM_TEMPERATURE",
                 "LLM_INSTRUCTION_FILE_PATH",
                 "LLM_MESSAGE_EXAMPLE_FILE_PATH",
-                "LLM_TEMPERATURE",
                 "LLM_MAX_MESSAGES",
                 "LOG_LEVEL",
             ]
