@@ -60,12 +60,6 @@ class Main:
         instructions = await self._load_instructions()
         self._llm_chat.configure(instructions)
 
-        # msg_example: list[gr.MessageDict | Message] = [
-        #     *await self._load_message_example()
-        # ]
-        # msg_example = cast(
-        #     list[gr.MessageDict | Message], await self._load_message_example()
-        # )
         msg_example = await self._load_message_example()
 
         with gr.Blocks(theme=gr.themes.Ocean(), title="AI Chat") as ui:
@@ -110,7 +104,6 @@ class Main:
 
                 with gr.Column(scale=4):
                     chatbot = gr.Chatbot(
-                        # value=msg_example,
                         cast(list[gr.MessageDict | Message], msg_example),
                         type="messages",
                         label="History",
@@ -161,8 +154,6 @@ class Main:
 
         return instructions
 
-    # async def _load_message_example(self) -> list[gr.MessageDict | Message]:
-    #     msg_example: list[gr.MessageDict | Message] = []
     async def _load_message_example(self) -> list[gr.MessageDict]:
         msg_example: list[gr.MessageDict] = []
 
@@ -175,25 +166,6 @@ class Main:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
                 msg_example_dict: dict = json.loads(await f.read())
                 msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
-                # for msg in msgs:
-                #     role = msg.get("role")
-                #     content = msg.get("content", "")
-                #     match role:
-                #         case "user":
-                #             msg_example.append(
-                #                 gr.MessageDict(role="user", content=content)
-                #             )
-                #         case "assistant":
-                #             msg_example.append(
-                #                 gr.MessageDict(role="assistant", content=content)
-                #             )
-                #         case "system":
-                #             msg_example.append(
-                #                 gr.MessageDict(role="system", content=content)
-                #             )
-                #         case _:
-                #             logger.warning(f"Unknown role: {role}")
-                # msg_example = [*self._to_ui_message(msgs)]
                 msg_example = self._to_ui_message(msgs)
         except Exception as e:
             logger.error(f"Failed to load message example: {e}")
@@ -206,17 +178,6 @@ class Main:
         hist_len = len(history)
         logger.debug(f"{hist_len + 1}: (User) {user_message}")
 
-        # hist: list[AnyMessage] = []
-
-        # for msg in history:
-        #     match msg["role"]:
-        #         case "user":
-        #             hist.append(HumanMessage(content=str(msg["content"])))
-        #         case "assistant":
-        #             hist.append(AIMessage(content=str(msg["content"])))
-        #         case "system":
-        #             hist.append(SystemMessage(content=str(msg["content"])))
-        # hist: list[AnyMessage] = [self._to_llm_message(msg) for msg in history]
         hist = self._to_llm_messages(history)
         ai_res = self._llm_chat.invoke(user_message, hist)
         logger.debug(f"{hist_len + 2}: (AI) {ai_res}")
@@ -225,13 +186,6 @@ class Main:
         history.append(gr.MessageDict(role="assistant", content=ai_res))
         # "" を返すと入力ボックスがクリアされる
         return "", history
-
-    # def _to_llm_message(self, msg: gr.MessageDict) -> AnyMessage:
-    #     return {
-    #         "user": HumanMessage,
-    #         "assistant": AIMessage,
-    #         "system": SystemMessage,
-    #     }.get(msg["role"], HumanMessage)(content=str(msg["content"]))
 
     def _to_ui_message(self, messages: list[ExampleMessage]) -> list[gr.MessageDict]:
         msgs: list[gr.MessageDict] = []
