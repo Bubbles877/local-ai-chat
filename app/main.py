@@ -134,10 +134,11 @@ class Main:
                         self._chat, [input_box, chatbot], [input_box, chatbot]
                     )
 
-        try:
-            ui.launch(inbrowser=True, share=False)
-        except KeyboardInterrupt:
-            logger.info("KeyboardInterrupt: Shutting down...")
+        # try:
+        #     ui.launch(inbrowser=True, share=False)
+        # except KeyboardInterrupt:
+        #     logger.info("KeyboardInterrupt: Shutting down...")
+        ui.launch(inbrowser=True, share=False)
 
         ui.close()
 
@@ -233,4 +234,8 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    asyncio.run(main.run())
+
+    try:
+        asyncio.run(main.run())
+    except KeyboardInterrupt:
+        logger.info("KeyboardInterrupt: Shutting down...")
