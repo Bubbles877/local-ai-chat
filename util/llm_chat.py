@@ -17,12 +17,19 @@ from loguru import logger
 class LLMChat:
     """LLM チャット"""
 
-    def __init__(self, configs: dict, llm: BaseChatModel, enable_logging: bool = False):
+    def __init__(
+        self,
+        #  configs: dict,
+        llm: BaseChatModel,
+        max_messages: int,
+        enable_logging: bool = False,
+    ):
         """初期化
 
         Args:
-            configs (dict): 設定
+            # configs (dict): 設定
             llm (BaseChatModel): LLM
+            max_messages (int): LLM に渡す会話履歴の最大数 (<0: 無制限)
             enable_logging (bool, optional): ログ出力を有効にするかどうか, Defaults to False.
         """
         if enable_logging:
@@ -30,27 +37,37 @@ class LLMChat:
         else:
             logger.disable(__name__)
 
-        self._cfgs = configs
+        # self._cfgs = configs
         self._llm = llm
 
-        self._trimmer: Optional[RunnableLambda[list[AnyMessage], list[AnyMessage]]] = (
-            None
-        )
-        try:
-            max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
-            if max_msgs >= 0:
-                # システムメッセージ含めて max_msgs 件残す
-                self._trimmer = trim_messages(
-                    max_tokens=max_msgs,
-                    token_counter=len,
-                    strategy="last",
-                    allow_partial=False,
-                    # start_on=HumanMessage,
-                    include_system=True,
-                )
-        except ValueError:
-            logger.warning(
-                f"Invalid LLM_MAX_MESSAGES value: {self._cfgs.get('LLM_MAX_MESSAGES')}"
+        self._msgs_trimmer: Optional[
+            RunnableLambda[list[AnyMessage], list[AnyMessage]]
+        ] = None
+        # try:
+        #     max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
+        #     if max_msgs >= 0:
+        #         # システムメッセージ含めて max_msgs 件残す
+        #         self._trimmer = trim_messages(
+        #             max_tokens=max_msgs,
+        #             token_counter=len,
+        #             strategy="last",
+        #             allow_partial=False,
+        #             # start_on=HumanMessage,
+        #             include_system=True,
+        #         )
+        # except ValueError:
+        #     logger.warning(
+        #         f"Invalid LLM_MAX_MESSAGES value: {self._cfgs.get('LLM_MAX_MESSAGES')}"
+        #     )
+        if max_messages >= 0:
+            # システムメッセージ含めて max_messages 件残す
+            self._msgs_trimmer = trim_messages(
+                max_tokens=max_messages,
+                token_counter=len,
+                strategy="last",
+                allow_partial=False,
+                # start_on=HumanMessage,
+                include_system=True,
             )
 
         self._instructions: str = ""
@@ -96,8 +113,8 @@ class LLMChat:
         if message:
             msgs.append(HumanMessage(content=message))
 
-        if self._trimmer:
-            msgs = self._trimmer.invoke(msgs)
+        if self._msgs_trimmer:
+            msgs = self._msgs_trimmer.invoke(msgs)
 
         # logger.debug(f"Messages: {msgs}")
         logger.debug(f"Messages: {len(msgs)}")

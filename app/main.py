@@ -51,7 +51,12 @@ class Main:
             base_url=self._llm_endpoint,
             temperature=float(self._llm_temperature) if self._llm_temperature else None,
         )
-        self._llm_chat = LLMChat(self._cfgs, llm, enable_logging=log_lv == "DEBUG")
+        self._llm_chat = LLMChat(
+            # self._cfgs,
+            llm,
+            self._llm_max_msgs,
+            enable_logging=log_lv == "DEBUG",
+        )
 
     async def run(self) -> None:
         """実行する"""
@@ -115,7 +120,7 @@ class Main:
                         type="messages",
                         label="History",
                         container=True,
-                        height=500
+                        height=500,
                         # elem_id="chatbot",
                         # elem_classes="chatbot",
                     )
