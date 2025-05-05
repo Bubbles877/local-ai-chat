@@ -80,18 +80,18 @@ class LLMChat:
         Returns:
             str: LLM の応答メッセージ
         """
-        msgs: list[AnyMessage] = []
-        msgs.append(SystemMessage(content=self._instructions))
+        # msgs: list[AnyMessage] = []
+        # msgs.append(SystemMessage(content=self._instructions))
 
-        # if self._msg_example is not None:
-        #     msgs.extend(self._msg_example)
-        if history is not None:
-            msgs.extend(history)
-        if message:
-            msgs.append(HumanMessage(content=message))
-        if self._msgs_trimmer:
-            msgs = self._msgs_trimmer.invoke(msgs)
-
+        # # if self._msg_example is not None:
+        # #     msgs.extend(self._msg_example)
+        # if history is not None:
+        #     msgs.extend(history)
+        # if message:
+        #     msgs.append(HumanMessage(content=message))
+        # if self._msgs_trimmer:
+        #     msgs = self._msgs_trimmer.invoke(msgs)
+        msgs = self._build_messages(message, history)
         logger.debug(f"Input messages: {len(msgs)}")
 
         prompt = ChatPromptTemplate.from_messages(msgs)
@@ -119,3 +119,17 @@ class LLMChat:
             str: LLM の応答メッセージ
         """
         return await asyncio.to_thread(self.invoke, message, history)
+
+    def _build_messages(
+        self, message: Optional[str], history: Optional[list[AnyMessage]]
+    ):
+        msgs: list[AnyMessage] = [SystemMessage(content=self._instructions)]
+
+        if history:
+            msgs.extend(history)
+        if message:
+            msgs.append(HumanMessage(content=message))
+        if self._msgs_trimmer:
+            msgs = self._msgs_trimmer.invoke(msgs)
+
+        return msgs
