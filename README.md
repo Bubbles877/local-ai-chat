@@ -6,6 +6,8 @@
 - [Ollama](https://github.com/ollama/ollama) を利用しています (Using Ollama)
 - 外部には一切データを送信しないローカル専用アプリです (Local-only app that never sends any data externally)
 
+![UI](images/ui.png)
+
 ## 2. 使い方
 
 1. 環境変数を設定する
