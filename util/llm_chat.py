@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import Optional
 
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -100,7 +101,11 @@ class LLMChat:
         result = ""
 
         try:
+            start_time = time.perf_counter()
             result = chain.invoke({})
+            logger.debug(
+                f"LLM invocation time: {(time.perf_counter() - start_time):.2f}s"
+            )
         except Exception as e:
             logger.error(f"LLM invocation failed: {e}")
 
