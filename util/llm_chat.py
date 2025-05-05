@@ -66,10 +66,11 @@ class LLMChat:
             message_example (Optional[list[AnyMessage]]): メッセージの例
         """
         self._instructions = instructions
-        self._msg_example = message_example
-
         logger.debug(f"Instructions: {self._instructions}")
-        logger.debug(f"Message example: {self._msg_example}")
+
+        if message_example:
+            self._msg_example = message_example
+            logger.debug(f"Message example: {self._msg_example}")
 
     def invoke(
         self,
