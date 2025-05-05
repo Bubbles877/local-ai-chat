@@ -36,17 +36,20 @@ class Main:
             retention="7 days",
         )
 
-        llm_name = self._cfgs.get("LLM_NAME", "")
-        llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
-        temperature = self._cfgs.get("LLM_TEMPERATURE")
-        logger.debug(f"LLM name: {llm_name}")
-        logger.debug(f"LLM endpoint: {llm_endpoint}")
-        logger.debug(f"LLM temperature: {temperature}")
+        self._llm_name = self._cfgs.get("LLM_NAME", "")
+        self._llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
+        self._llm_temperature = self._cfgs.get("LLM_TEMPERATURE")
+        # self._llm_max_msgs = self._cfgs.get("LLM_MAX_MESSAGES", -1)
+        self._llm_max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
+        logger.debug(f"LLM name: {self._llm_name}")
+        logger.debug(f"LLM endpoint: {self._llm_endpoint}")
+        logger.debug(f"LLM temperature: {self._llm_temperature}")
+        logger.debug(f"LLM max messages: {self._llm_max_msgs}")
 
         llm = ChatOllama(
-            model=llm_name,
-            base_url=llm_endpoint,
-            temperature=float(temperature) if temperature else None,
+            model=self._llm_name,
+            base_url=self._llm_endpoint,
+            temperature=float(self._llm_temperature) if self._llm_temperature else None,
         )
         self._llm_chat = LLMChat(self._cfgs, llm, enable_logging=log_lv == "DEBUG")
 
@@ -56,17 +59,78 @@ class Main:
         msg_example = await self._load_message_example()
         self._llm_chat.configure(instructions, msg_example)
 
-        with gr.Blocks() as ui:
-            chatbot = gr.Chatbot(type="messages")
-            input_field = gr.Textbox()
-            gr.ClearButton([input_field, chatbot])
+        with gr.Blocks(
+            # title="AI Chat", css=".chatbot {height:1000px; overflow:auto;}"
+            # theme=gr.themes.Citrus(),
+            # theme=gr.themes.Default(),
+            # theme=gr.themes.Glass(),
+            # theme=gr.themes.Monochrome(),
+            theme=gr.themes.Ocean(),
+            # theme=gr.themes.Origin(),
+            # theme=gr.themes.Soft(),
+            title="AI Chat",
+        ) as ui:
+            gr.Markdown("## 💬 Local AI Chat")
 
-            input_field.submit(
-                self._chat, [input_field, chatbot], [input_field, chatbot]
-            )
+            with gr.Row():
+                with gr.Column(scale=1):
+                    with gr.Accordion("Settings", open=False):
+                        with gr.Column():
+                            gr.Textbox(
+                                label="LLM Name",
+                                value=self._llm_name,
+                                lines=1,
+                                max_lines=1,
+                                interactive=False,
+                            )
+                            gr.Textbox(
+                                label="Temperature",
+                                value=self._llm_temperature,
+                                lines=1,
+                                max_lines=1,
+                                interactive=False,
+                            )
+                            gr.Textbox(
+                                label="Max Messages",
+                                value=str(self._llm_max_msgs),
+                                lines=1,
+                                max_lines=1,
+                                interactive=False,
+                            )
+                        instructions_box = gr.Textbox(
+                            label="Instructions (editable)",
+                            value=instructions,
+                            lines=10,
+                            max_lines=20,
+                            interactive=True,
+                        )
+                        gr.Button("Update").click(
+                            lambda x: self._llm_chat.configure(x),
+                            inputs=instructions_box,
+                            # outputs=instructions_box,
+                        )
+
+                with gr.Column(scale=4):
+                    chatbot = gr.Chatbot(
+                        type="messages",
+                        label="History",
+                        container=True,
+                        height=500
+                        # elem_id="chatbot",
+                        # elem_classes="chatbot",
+                    )
+                    input_box = gr.Textbox(
+                        placeholder="Shift + Enter で改行",
+                        show_label=False,
+                    )
+                    gr.ClearButton([input_box, chatbot])
+
+                    input_box.submit(
+                        self._chat, [input_box, chatbot], [input_box, chatbot]
+                    )
 
         try:
-            ui.launch()
+            ui.launch(inbrowser=True, share=False)
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt: Shutting down...")
 
