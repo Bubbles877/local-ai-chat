@@ -77,7 +77,7 @@ class LLMChat:
             history (Optional[list[AnyMessage]]): 会話履歴
 
         Returns:
-            str: 結果
+            str: LLM の応答メッセージ
         """
         msgs: list[AnyMessage] = []
         msgs.append(SystemMessage(content=self._instructions))
@@ -88,7 +88,6 @@ class LLMChat:
             msgs.extend(history)
         if message:
             msgs.append(HumanMessage(content=message))
-
         if self._msgs_trimmer:
             msgs = self._msgs_trimmer.invoke(msgs)
 
@@ -96,11 +95,18 @@ class LLMChat:
 
         prompt = ChatPromptTemplate.from_messages(msgs)
         chain = prompt | self._llm | StrOutputParser()
-        result = chain.invoke({})
+
+        result = ""
+
+        try:
+            result = chain.invoke({})
+        except Exception as e:
+            logger.error(f"LLM invocation failed: {e}")
+
         return result
 
     async def ainvoke(
-        self, history: list[AnyMessage], message: Optional[str] = None
+        self, message: Optional[str] = None, history: Optional[list[AnyMessage]] = None
     ) -> str:
         """LLM を呼び出す (非同期)
 
@@ -109,6 +115,6 @@ class LLMChat:
             history (Optional[list[AnyMessage]]): 会話履歴
 
         Returns:
-            str: 結果
+            str: LLM の応答メッセージ
         """
         return await asyncio.to_thread(self.invoke, message, history)
