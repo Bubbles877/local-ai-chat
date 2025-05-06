@@ -1,24 +1,21 @@
 import asyncio
-import json
-import os
 import sys
-from typing import TypedDict
 
-import aiofiles
 import gradio as gr
+
 # from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from loguru import logger
 
-from app.ui import UI
+from app.resource_loader import ResourceLoader, LLMMessageExample
 from app.settings import Settings
+from app.ui import UI
 from util.llm_chat import LLMChat
 
-
-class ExampleMessage(TypedDict):
-    role: str
-    content: str
+# class ExampleMessage(TypedDict):
+#     role: str
+#     content: str
 
 
 class Main:
@@ -50,6 +47,10 @@ class Main:
         logger.debug(f"LLM temperature: {self._settings.llm_temperature}")
         logger.debug(f"LLM max messages: {self._settings.llm_max_messages}")
 
+        self._resource_loader = ResourceLoader(
+            self._settings, enable_logging=self._settings.log_level == "DEBUG"
+        )
+
         llm = ChatOllama(
             model=self._settings.llm_name,
             base_url=self._settings.llm_endpoint,
@@ -58,23 +59,27 @@ class Main:
             else None,
         )
         self._llm_chat = LLMChat(
-            llm, self._settings.llm_max_messages, enable_logging=self._settings.log_level == "DEBUG"
+            llm,
+            self._settings.llm_max_messages,
+            enable_logging=self._settings.log_level == "DEBUG",
         )
 
     async def run(self) -> None:
         """実行する"""
-        instructions = await self._load_instructions()
-        self._llm_chat.configure(instructions)
+        llm_instructions = await self._resource_loader.load_llm_instructions()
+        self._llm_chat.configure(llm_instructions)
 
-        msg_example = await self._load_message_example()
+        llm_msg_example = self._to_ui_message(
+            await self._resource_loader.load_llm_message_example()
+        )
 
         ui = UI(
-            msg_example,
+            llm_msg_example,
             self._chat,
             self._settings.llm_name,
             self._settings.llm_temperature,
             self._settings.llm_max_messages,
-            instructions,
+            llm_instructions,
             self._llm_chat.configure,
         )
         ui.launch()
@@ -96,7 +101,7 @@ class Main:
     #     return cfgs
 
     @staticmethod
-    def _setup_logger(log_level:str) -> None:
+    def _setup_logger(log_level: str) -> None:
         logger.remove()  # default: stderr
         logger.add(sys.stdout, level=log_level)
         logger.add(
@@ -108,48 +113,48 @@ class Main:
             retention="7 days",
         )
 
-    async def _load_instructions(self) -> str:
-        instructions = ""
+    # async def _load_instructions(self) -> str:
+    #     instructions = ""
 
-        # file_path = self._cfgs.get("LLM_INSTRUCTION_FILE_PATH", "")
-        # file_path = self._settings.llm_instruction_file_path
-        if not (file_path := self._settings.llm_instruction_file_path):
-            logger.info("Instruction file path not set")
-            return instructions
+    #     # file_path = self._cfgs.get("LLM_INSTRUCTION_FILE_PATH", "")
+    #     # file_path = self._settings.llm_instruction_file_path
+    #     if not (file_path := self._settings.llm_instruction_file_path):
+    #         logger.info("Instruction file path not set")
+    #         return instructions
 
-        if not os.path.isfile(file_path):
-            logger.warning(f"Instruction file not found: {file_path}")
-            return instructions
+    #     if not os.path.isfile(file_path):
+    #         logger.warning(f"Instruction file not found: {file_path}")
+    #         return instructions
 
-        try:
-            async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-                instructions = await f.read()
-        except Exception as e:
-            logger.error(f"Failed to load instructions: {e}")
+    #     try:
+    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+    #             instructions = await f.read()
+    #     except Exception as e:
+    #         logger.error(f"Failed to load instructions: {e}")
 
-        return instructions
+    #     return instructions
 
-    async def _load_message_example(self) -> list[gr.MessageDict]:
-        msg_example: list[gr.MessageDict] = []
+    # async def _load_message_example(self) -> list[gr.MessageDict]:
+    #     msg_example: list[gr.MessageDict] = []
 
-        # file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
-        if not (file_path := self._settings.llm_message_example_file_path):
-            logger.info("Message example file path not set")
-            return msg_example
+    #     # file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
+    #     if not (file_path := self._settings.llm_message_example_file_path):
+    #         logger.info("Message example file path not set")
+    #         return msg_example
 
-        if not os.path.isfile(file_path):
-            logger.warning(f"Message example file not found: {file_path}")
-            return msg_example
+    #     if not os.path.isfile(file_path):
+    #         logger.warning(f"Message example file not found: {file_path}")
+    #         return msg_example
 
-        try:
-            async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-                msg_example_dict: dict = json.loads(await f.read())
-                msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
-                msg_example = self._to_ui_message(msgs)
-        except Exception as e:
-            logger.error(f"Failed to load message example: {e}")
+    #     try:
+    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+    #             msg_example_dict: dict = json.loads(await f.read())
+    #             msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
+    #             msg_example = self._to_ui_message(msgs)
+    #     except Exception as e:
+    #         logger.error(f"Failed to load message example: {e}")
 
-        return msg_example
+    #     return msg_example
 
     def _chat(
         self, user_message: str, history: list[gr.MessageDict]
@@ -166,7 +171,8 @@ class Main:
         # "" を返すと入力ボックスがクリアされる
         return "", history
 
-    def _to_ui_message(self, messages: list[ExampleMessage]) -> list[gr.MessageDict]:
+    @staticmethod
+    def _to_ui_message(messages: list[LLMMessageExample]) -> list[gr.MessageDict]:
         msgs: list[gr.MessageDict] = []
 
         for msg in messages:
@@ -181,7 +187,8 @@ class Main:
 
         return msgs
 
-    def _to_llm_messages(self, messages: list[gr.MessageDict]) -> list[AnyMessage]:
+    @staticmethod
+    def _to_llm_messages(messages: list[gr.MessageDict]) -> list[AnyMessage]:
         msgs: list[AnyMessage] = []
 
         for msg in messages:
