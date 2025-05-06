@@ -3,14 +3,12 @@ import os
 from typing import TypedDict
 
 import aiofiles
-
-# import gradio as gr
 from loguru import logger
 
 from app.settings import Settings
 
 
-class LLMMessageExample(TypedDict):
+class LLMMessage(TypedDict):
     role: str
     content: str
 
@@ -54,14 +52,13 @@ class ResourceLoader:
 
         return instructions
 
-    # async def load_llm_message_example(self) -> list[gr.MessageDict]:
-    async def load_llm_message_example(self) -> list[LLMMessageExample]:
+    async def load_llm_message_example(self) -> list[LLMMessage]:
         """設定ファイルから ユーザーと AI の会話例を読み込む
 
         Returns:
             list[gr.MessageDict]: 会話例
         """
-        msg_example: list[LLMMessageExample] = []
+        msg_example: list[LLMMessage] = []
 
         if not (file_path := self._settings.llm_message_example_file_path):
             logger.info("Message example file path not set")
@@ -74,26 +71,8 @@ class ResourceLoader:
         try:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
                 msg_example_dict: dict = json.loads(await f.read())
-                # msgs: list[LLMMessageExample] = msg_example_dict.get("messages", [])
                 msg_example = msg_example_dict.get("messages", [])
-                # msg_example = self._to_ui_message(msgs)
         except Exception as e:
             logger.error(f"Failed to load message example: {e}")
 
         return msg_example
-
-    # @staticmethod
-    # def _to_ui_message(messages: list[LLMMessageExample]) -> list[gr.MessageDict]:
-    #     msgs: list[gr.MessageDict] = []
-
-    #     for msg in messages:
-    #         role = msg.get("role", "")
-    #         match role:
-    #             case "user" | "assistant" | "system":
-    #                 msgs.append(
-    #                     gr.MessageDict(role=role, content=msg.get("content", ""))
-    #                 )
-    #             case _:
-    #                 logger.warning(f"Unknown role: {role}")
-
-    #     return msgs

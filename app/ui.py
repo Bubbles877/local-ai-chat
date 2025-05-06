@@ -1,4 +1,4 @@
-from typing import Callable, cast, Optional
+from typing import Callable, Optional, cast
 
 import gradio as gr
 from gradio.components.chatbot import Message

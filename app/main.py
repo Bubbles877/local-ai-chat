@@ -2,46 +2,21 @@ import asyncio
 import sys
 
 import gradio as gr
-
-# from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from loguru import logger
 
-from app.resource_loader import ResourceLoader, LLMMessageExample
+from app.resource_loader import LLMMessage, ResourceLoader
 from app.settings import Settings
 from app.ui import UI
 from util.llm_chat import LLMChat
-
-# class ExampleMessage(TypedDict):
-#     role: str
-#     content: str
 
 
 class Main:
     def __init__(self):
         self._settings = Settings()
-
-        # load_dotenv(verbose=True)
-        # self._cfgs = self._load_env_vars()
-
-        # log_lv = self._cfgs.get("LOG_LEVEL", "INFO")
-        # logger.remove()  # default: stderr
-        # logger.add(sys.stdout, level=self._settings.log_level)
-        # logger.add(
-        #     "log/app_{time}.log",
-        #     level=self._settings.log_level,
-        #     diagnose=self._settings.log_level == "DEBUG",
-        #     enqueue=True,
-        #     rotation="1 day",
-        #     retention="7 days",
-        # )
         self._setup_logger(self._settings.log_level)
 
-        # self._llm_name = self._settings.llm_name
-        # self._llm_endpoint = self._settings.llm_endpoint
-        # self._llm_temperature = self._settings.llm_temperature
-        # self._llm_max_msgs = int(self._settings.llm_max_messages)
         logger.debug(f"LLM name: {self._settings.llm_name}")
         logger.debug(f"LLM endpoint: {self._settings.llm_endpoint}")
         logger.debug(f"LLM temperature: {self._settings.llm_temperature}")
@@ -84,22 +59,6 @@ class Main:
         )
         ui.launch()
 
-    # def _load_env_vars(self) -> dict[str, str]:
-    #     cfgs = {
-    #         var: val
-    #         for var in [
-    #             "LLM_NAME",
-    #             "LLM_ENDPOINT",
-    #             "LLM_TEMPERATURE",
-    #             "LLM_INSTRUCTION_FILE_PATH",
-    #             "LLM_MESSAGE_EXAMPLE_FILE_PATH",
-    #             "LLM_MAX_MESSAGES",
-    #             "LOG_LEVEL",
-    #         ]
-    #         if (val := os.getenv(var)) is not None
-    #     }
-    #     return cfgs
-
     @staticmethod
     def _setup_logger(log_level: str) -> None:
         logger.remove()  # default: stderr
@@ -112,49 +71,6 @@ class Main:
             rotation="1 day",
             retention="7 days",
         )
-
-    # async def _load_instructions(self) -> str:
-    #     instructions = ""
-
-    #     # file_path = self._cfgs.get("LLM_INSTRUCTION_FILE_PATH", "")
-    #     # file_path = self._settings.llm_instruction_file_path
-    #     if not (file_path := self._settings.llm_instruction_file_path):
-    #         logger.info("Instruction file path not set")
-    #         return instructions
-
-    #     if not os.path.isfile(file_path):
-    #         logger.warning(f"Instruction file not found: {file_path}")
-    #         return instructions
-
-    #     try:
-    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-    #             instructions = await f.read()
-    #     except Exception as e:
-    #         logger.error(f"Failed to load instructions: {e}")
-
-    #     return instructions
-
-    # async def _load_message_example(self) -> list[gr.MessageDict]:
-    #     msg_example: list[gr.MessageDict] = []
-
-    #     # file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
-    #     if not (file_path := self._settings.llm_message_example_file_path):
-    #         logger.info("Message example file path not set")
-    #         return msg_example
-
-    #     if not os.path.isfile(file_path):
-    #         logger.warning(f"Message example file not found: {file_path}")
-    #         return msg_example
-
-    #     try:
-    #         async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
-    #             msg_example_dict: dict = json.loads(await f.read())
-    #             msgs: list[ExampleMessage] = msg_example_dict.get("messages", [])
-    #             msg_example = self._to_ui_message(msgs)
-    #     except Exception as e:
-    #         logger.error(f"Failed to load message example: {e}")
-
-    #     return msg_example
 
     def _chat(
         self, user_message: str, history: list[gr.MessageDict]
@@ -172,7 +88,7 @@ class Main:
         return "", history
 
     @staticmethod
-    def _to_ui_message(messages: list[LLMMessageExample]) -> list[gr.MessageDict]:
+    def _to_ui_message(messages: list[LLMMessage]) -> list[gr.MessageDict]:
         msgs: list[gr.MessageDict] = []
 
         for msg in messages:
