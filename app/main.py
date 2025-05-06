@@ -29,16 +29,17 @@ class Main:
         # self._cfgs = self._load_env_vars()
 
         # log_lv = self._cfgs.get("LOG_LEVEL", "INFO")
-        logger.remove()  # default: stderr
-        logger.add(sys.stdout, level=self._settings.log_level)
-        logger.add(
-            "log/app_{time}.log",
-            level=self._settings.log_level,
-            diagnose=self._settings.log_level == "DEBUG",
-            enqueue=True,
-            rotation="1 day",
-            retention="7 days",
-        )
+        # logger.remove()  # default: stderr
+        # logger.add(sys.stdout, level=self._settings.log_level)
+        # logger.add(
+        #     "log/app_{time}.log",
+        #     level=self._settings.log_level,
+        #     diagnose=self._settings.log_level == "DEBUG",
+        #     enqueue=True,
+        #     rotation="1 day",
+        #     retention="7 days",
+        # )
+        self._setup_logger(self._settings.log_level)
 
         # self._llm_name = self._settings.llm_name
         # self._llm_endpoint = self._settings.llm_endpoint
@@ -93,6 +94,19 @@ class Main:
     #         if (val := os.getenv(var)) is not None
     #     }
     #     return cfgs
+
+    @staticmethod
+    def _setup_logger(log_level:str) -> None:
+        logger.remove()  # default: stderr
+        logger.add(sys.stdout, level=log_level)
+        logger.add(
+            "log/app_{time}.log",
+            level=log_level,
+            diagnose=log_level == "DEBUG",
+            enqueue=True,
+            rotation="1 day",
+            retention="7 days",
+        )
 
     async def _load_instructions(self) -> str:
         instructions = ""
