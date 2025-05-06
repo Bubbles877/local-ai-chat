@@ -55,7 +55,7 @@ class LLMChat:
         """設定する
 
         Args:
-            instructions (str): 指示
+            instructions (str): LLM への指示 (システムプロンプト)
         """
         self._instructions = instructions
         logger.debug(f"Instructions: {self._instructions}")
