@@ -24,7 +24,7 @@
 以下の環境変数があります。
 
 - LLM_NAME
-  - LLM 名 (e.g. qwen2.5:32b)
+  - LLM 名 (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
