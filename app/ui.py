@@ -1,4 +1,4 @@
-from typing import Callable, cast
+from typing import Callable, cast, Optional
 
 import gradio as gr
 from gradio.components.chatbot import Message
@@ -12,7 +12,7 @@ class UI:
             [str, list[gr.MessageDict]], tuple[str, list[gr.MessageDict]]
         ],
         llm_name: str,
-        llm_temperature: str,
+        llm_temperature: Optional[float],
         llm_max_msgs: int,
         instructions: str,
         on_setting_updated: Callable[[str], None],
@@ -23,7 +23,7 @@ class UI:
             message_example (list[gr.MessageDict]): ユーザーと AI の会話例
             chat_callback (Callable[ [str, list[gr.MessageDict]], tuple[str, list[gr.MessageDict]] ]): 会話のコールバック
             llm_name (str): LLM 名
-            llm_temperature (str): LLM が生成する出力のランダム性、創造性
+            llm_temperature (Optional[float]): LLM が生成する出力のランダム性、創造性
             llm_max_msgs (int): LLM に渡す会話履歴の最大数
             instructions (str): 指示
             on_setting_updated (Callable[[str], None]): 設定更新のコールバック
@@ -54,7 +54,9 @@ class UI:
                             )
                             gr.Textbox(
                                 label="Temperature",
-                                value=self._llm_temperature,
+                                value=str(self._llm_temperature)
+                                if self._llm_temperature
+                                else "Default",
                                 lines=1,
                                 max_lines=1,
                                 interactive=False,

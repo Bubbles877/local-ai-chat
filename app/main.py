@@ -6,12 +6,13 @@ from typing import TypedDict
 
 import aiofiles
 import gradio as gr
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
 from langchain_ollama import ChatOllama
 from loguru import logger
 
 from app.ui import UI
+from app.settings import Settings
 from util.llm_chat import LLMChat
 
 
@@ -22,37 +23,41 @@ class ExampleMessage(TypedDict):
 
 class Main:
     def __init__(self):
-        load_dotenv(verbose=True)
-        self._cfgs = self._load_env_vars()
+        self._settings = Settings()
 
-        log_lv = self._cfgs.get("LOG_LEVEL", "INFO")
+        # load_dotenv(verbose=True)
+        # self._cfgs = self._load_env_vars()
+
+        # log_lv = self._cfgs.get("LOG_LEVEL", "INFO")
         logger.remove()  # default: stderr
-        logger.add(sys.stdout, level=log_lv)
+        logger.add(sys.stdout, level=self._settings.log_level)
         logger.add(
             "log/app_{time}.log",
-            level=log_lv,
-            diagnose=log_lv == "DEBUG",
+            level=self._settings.log_level,
+            diagnose=self._settings.log_level == "DEBUG",
             enqueue=True,
             rotation="1 day",
             retention="7 days",
         )
 
-        self._llm_name = self._cfgs.get("LLM_NAME", "")
-        self._llm_endpoint = self._cfgs.get("LLM_ENDPOINT")
-        self._llm_temperature = self._cfgs.get("LLM_TEMPERATURE")
-        self._llm_max_msgs = int(self._cfgs.get("LLM_MAX_MESSAGES", -1))
-        logger.debug(f"LLM name: {self._llm_name}")
-        logger.debug(f"LLM endpoint: {self._llm_endpoint}")
-        logger.debug(f"LLM temperature: {self._llm_temperature}")
-        logger.debug(f"LLM max messages: {self._llm_max_msgs}")
+        # self._llm_name = self._settings.llm_name
+        # self._llm_endpoint = self._settings.llm_endpoint
+        # self._llm_temperature = self._settings.llm_temperature
+        # self._llm_max_msgs = int(self._settings.llm_max_messages)
+        logger.debug(f"LLM name: {self._settings.llm_name}")
+        logger.debug(f"LLM endpoint: {self._settings.llm_endpoint}")
+        logger.debug(f"LLM temperature: {self._settings.llm_temperature}")
+        logger.debug(f"LLM max messages: {self._settings.llm_max_messages}")
 
         llm = ChatOllama(
-            model=self._llm_name,
-            base_url=self._llm_endpoint,
-            temperature=float(self._llm_temperature) if self._llm_temperature else None,
+            model=self._settings.llm_name,
+            base_url=self._settings.llm_endpoint,
+            temperature=float(self._settings.llm_temperature)
+            if self._settings.llm_temperature
+            else None,
         )
         self._llm_chat = LLMChat(
-            llm, self._llm_max_msgs, enable_logging=log_lv == "DEBUG"
+            llm, self._settings.llm_max_messages, enable_logging=self._settings.log_level == "DEBUG"
         )
 
     async def run(self) -> None:
@@ -65,34 +70,39 @@ class Main:
         ui = UI(
             msg_example,
             self._chat,
-            self._llm_name,
-            self._llm_temperature if self._llm_temperature else "",
-            self._llm_max_msgs,
+            self._settings.llm_name,
+            self._settings.llm_temperature,
+            self._settings.llm_max_messages,
             instructions,
             self._llm_chat.configure,
         )
         ui.launch()
 
-    def _load_env_vars(self) -> dict[str, str]:
-        cfgs = {
-            var: val
-            for var in [
-                "LLM_NAME",
-                "LLM_ENDPOINT",
-                "LLM_TEMPERATURE",
-                "LLM_INSTRUCTION_FILE_PATH",
-                "LLM_MESSAGE_EXAMPLE_FILE_PATH",
-                "LLM_MAX_MESSAGES",
-                "LOG_LEVEL",
-            ]
-            if (val := os.getenv(var)) is not None
-        }
-        return cfgs
+    # def _load_env_vars(self) -> dict[str, str]:
+    #     cfgs = {
+    #         var: val
+    #         for var in [
+    #             "LLM_NAME",
+    #             "LLM_ENDPOINT",
+    #             "LLM_TEMPERATURE",
+    #             "LLM_INSTRUCTION_FILE_PATH",
+    #             "LLM_MESSAGE_EXAMPLE_FILE_PATH",
+    #             "LLM_MAX_MESSAGES",
+    #             "LOG_LEVEL",
+    #         ]
+    #         if (val := os.getenv(var)) is not None
+    #     }
+    #     return cfgs
 
     async def _load_instructions(self) -> str:
         instructions = ""
 
-        file_path = self._cfgs.get("LLM_INSTRUCTION_FILE_PATH", "")
+        # file_path = self._cfgs.get("LLM_INSTRUCTION_FILE_PATH", "")
+        # file_path = self._settings.llm_instruction_file_path
+        if not (file_path := self._settings.llm_instruction_file_path):
+            logger.info("Instruction file path not set")
+            return instructions
+
         if not os.path.isfile(file_path):
             logger.warning(f"Instruction file not found: {file_path}")
             return instructions
@@ -108,7 +118,11 @@ class Main:
     async def _load_message_example(self) -> list[gr.MessageDict]:
         msg_example: list[gr.MessageDict] = []
 
-        file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
+        # file_path = self._cfgs.get("LLM_MESSAGE_EXAMPLE_FILE_PATH", "")
+        if not (file_path := self._settings.llm_message_example_file_path):
+            logger.info("Message example file path not set")
+            return msg_example
+
         if not os.path.isfile(file_path):
             logger.warning(f"Message example file not found: {file_path}")
             return msg_example
