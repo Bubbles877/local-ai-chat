@@ -11,9 +11,9 @@ class Settings(BaseSettings):
 
     llm_name: str
     llm_endpoint: str
-    llm_temperature: Optional[float]
-    llm_instruction_file_path: Optional[str]
-    llm_message_example_file_path: Optional[str]
+    llm_temperature: Optional[float] = None
+    llm_instruction_file_path: Optional[str] = None
+    llm_message_example_file_path: Optional[str] = None
     llm_max_messages: int = -1
     log_level: str = "INFO"
 
