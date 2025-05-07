@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     """
 
     llm_name: str
-    llm_endpoint: str
+    llm_endpoint: Optional[str] = None
     llm_temperature: Optional[float] = None
     llm_instruction_file_path: Optional[str] = None
     llm_message_example_file_path: Optional[str] = None
