@@ -86,7 +86,7 @@ class UI:
                         type="messages",
                         label="History",
                         container=True,
-                        height=500,
+                        height=600,
                         editable="all",
                     )
                     input_box = gr.Textbox(
