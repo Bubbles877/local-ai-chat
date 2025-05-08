@@ -1,51 +1,53 @@
 ﻿# local-ai-chat
 
-## 1. 概要
+[日本語 Readme](./README.ja.md)
 
-- ローカル AI チャットアプリ (Local AI Chat App)
-- [Ollama](https://github.com/ollama/ollama)、[Gradio](https://www.gradio.app/) を利用 (Built with Ollama and Gradio)
-- 外部には一切データを送信しないローカル専用アプリです (local-only, no external data transfer)
+## 1. Overview
+
+- Local AI Chat App
+- Built with [Ollama](https://github.com/ollama/ollama) and [Gradio](https://www.gradio.app/)
+- Runs entirely on your local machine with no external data transfers
 
 ![UI](images/ui.png)
 
-## 2. 使い方
+## 2. Usage
 
-1. 環境変数を設定する
-2. アプリを実行する
-3. Web ブラウザで AI とチャットする
+1. Set up environment variables
+2. Run the app
+3. Chat with the AI via web browser
 
-### 2.1. 環境変数
+### 2.1. Environment Variables
 
-環境変数の設定が必要です。
+Environment variables are required.
 
-ローカル環境ではプロジェクトのルートに`.env`を作成して環境変数を設定してください。  
-[.env.example](./.env.example) がサンプルです。
+Create a `.env` file at the project root in your local environment and set the environment variables.  
+See [.env.example](./.env.example) for reference.
 
-以下の環境変数があります。
+Available environment variables:
 
 - LLM_NAME
-  - LLM 名 (e.g. qwen2.5:32b, gemma3:27b)
+  - Name of the LLM (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
-  - LLM API の URL (e.g. `http://localhost:11434/`)
+  - URL of the LLM API (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
-  - LLM の温度 (生成する出力のランダム性、創造性) (0.0-1.0)
+  - Sampling temperature of the LLM (0.0-1.0)
 - LLM_INSTRUCTION_FILE_PATH
-  - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instruction.txt`)
+  - File path for the system prompt file used as instructions for the LLM (e.g. `data/llm_instruction.txt`)
 - LLM_MESSAGE_EXAMPLE_FILE_PATH
-  - ユーザーと AI の会話例の設定ファイルのパス (e.g. `data/llm_message_example.json`)
-  - 先行するメッセージとして会話履歴に含められる
+  - File path for the example conversation between user and AI (e.g. `data/llm_message_example.json`)
+  - Included in the conversation history as preceding messages
 - LLM_MAX_MESSAGES
-  - LLM に渡す会話履歴の最大数 (<0: 無制限)
-  - より新しいメッセージを優先に最大数まで渡す
+  - Maximum number of messages to include in the conversation history passed to the LLM (<0: unlimited)
+  - The most recent messages are prioritized up to the maximum count
 - LOG_LEVEL
-  - ログレベル (ERROR|WARNING|INFO|DEBUG)
+  - Log level (ERROR|WARNING|INFO|DEBUG)
 
-### 2.2. プログラムの実行
+### 2.2. Running the App
 
 ```sh
 poetry run python app/main.py
 ```
 
-## 3. リポジトリ
+## 3.Repository
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
