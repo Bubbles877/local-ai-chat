@@ -29,9 +29,7 @@ class Main:
         llm = ChatOllama(
             model=self._settings.llm_name,
             base_url=self._settings.llm_endpoint,
-            temperature=float(self._settings.llm_temperature)
-            if self._settings.llm_temperature
-            else None,
+            temperature=self._settings.llm_temperature,
         )
         self._llm_chat = LLMChat(
             llm,
