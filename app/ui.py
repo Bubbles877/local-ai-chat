@@ -46,33 +46,33 @@ class UI:
                     with gr.Accordion("Settings", open=False):
                         with gr.Column():
                             gr.Textbox(
-                                label="LLM Name",
-                                value=self._llm_name,
+                                self._llm_name,
                                 lines=1,
                                 max_lines=1,
+                                label="LLM Name",
                                 interactive=False,
                             )
                             gr.Textbox(
-                                label="Temperature",
-                                value=str(self._llm_temperature)
+                                str(self._llm_temperature)
                                 if self._llm_temperature
                                 else "Default",
                                 lines=1,
                                 max_lines=1,
+                                label="Temperature",
                                 interactive=False,
                             )
                             gr.Textbox(
-                                label="Max Messages",
-                                value=str(self._llm_max_msgs),
+                                str(self._llm_max_msgs),
                                 lines=1,
                                 max_lines=1,
+                                label="Max Messages",
                                 interactive=False,
                             )
                         instructions_box = gr.Textbox(
-                            label="Instructions (editable)",
-                            value=self._instructions,
+                            self._instructions,
                             lines=10,
                             max_lines=20,
+                            label="Instructions (editable)",
                             interactive=True,
                         )
                         gr.Button("Update").click(
@@ -87,6 +87,7 @@ class UI:
                         label="History",
                         container=True,
                         height=500,
+                        editable="all",
                     )
                     input_box = gr.Textbox(
                         placeholder="Shift + Enter で改行", show_label=False
