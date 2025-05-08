@@ -9,15 +9,13 @@ class Settings(BaseSettings):
     環境変数から設定を読み込んで管理します。
     """
 
-    llm_name: str
-    llm_endpoint: Optional[str] = None
-    llm_temperature: Optional[float] = None
     llm_instruction_file_path: Optional[str] = None
     llm_message_example_file_path: Optional[str] = None
     llm_max_messages: int = -1
     log_level: str = "INFO"
 
     model_config = SettingsConfigDict(
+        extra="ignore",
         env_file=".env",
         env_file_encoding="utf-8",
     )

@@ -10,26 +10,27 @@ from app.resource_loader import LLMMessage, ResourceLoader
 from app.settings import Settings
 from app.ui import UI
 from util.llm_chat import LLMChat
+from util.setting.llm_settings import LLMSettings
 
 
 class Main:
     def __init__(self):
         self._settings = Settings()
+        self._llm_settings = LLMSettings()
+
         self._setup_logger(self._settings.log_level)
 
-        logger.debug(f"LLM name: {self._settings.llm_name}")
-        logger.debug(f"LLM endpoint: {self._settings.llm_endpoint}")
-        logger.debug(f"LLM temperature: {self._settings.llm_temperature}")
-        logger.debug(f"LLM max messages: {self._settings.llm_max_messages}")
+        logger.debug(f"Settings:\n{self._settings.model_dump_json(indent=2)}")
+        logger.debug(f"LLM Settings:\n{self._llm_settings.model_dump_json(indent=2)}")
 
         self._resource_loader = ResourceLoader(
             self._settings, enable_logging=self._settings.log_level == "DEBUG"
         )
 
         llm = ChatOllama(
-            model=self._settings.llm_name,
-            base_url=self._settings.llm_endpoint,
-            temperature=self._settings.llm_temperature,
+            model=self._llm_settings.name,
+            base_url=self._llm_settings.endpoint,
+            temperature=self._llm_settings.temperature,
         )
         self._llm_chat = LLMChat(
             llm,
@@ -49,8 +50,8 @@ class Main:
         ui = UI(
             llm_msg_example,
             self._chat,
-            self._settings.llm_name,
-            self._settings.llm_temperature,
+            self._llm_settings.name,
+            self._llm_settings.temperature,
             self._settings.llm_max_messages,
             llm_instructions,
             self._llm_chat.configure,

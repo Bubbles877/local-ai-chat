@@ -28,7 +28,7 @@
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
-  - LLM が生成する出力のランダム性、創造性 (0.0-1.0)
+  - LLM の温度 (生成する出力のランダム性、創造性) (0.0-1.0)
 - LLM_INSTRUCTION_FILE_PATH
   - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instruction.txt`)
 - LLM_MESSAGE_EXAMPLE_FILE_PATH
