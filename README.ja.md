@@ -25,22 +25,22 @@
 
 以下の環境変数があります。
 
+- LOG_LEVEL
+  - ログレベル (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
 - LLM_NAME
   - LLM 名 (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
   - LLM の温度 (生成する出力のランダム性、創造性) (0.0-1.0)
+- LLM_MAX_MESSAGES
+  - LLM に渡す会話履歴の最大数 (<0: 無制限)
+  - より新しいメッセージを優先に最大数まで渡す
 - LLM_INSTRUCTION_FILE_PATH
   - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instruction.txt`)
 - LLM_MESSAGE_EXAMPLE_FILE_PATH
   - ユーザーと AI の会話例の設定ファイルのパス (e.g. `data/llm_message_example.json`)
   - 先行するメッセージとして会話履歴に含められる
-- LLM_MAX_MESSAGES
-  - LLM に渡す会話履歴の最大数 (<0: 無制限)
-  - より新しいメッセージを優先に最大数まで渡す
-- LOG_LEVEL
-  - ログレベル (ERROR|WARNING|INFO|DEBUG)
 
 ### 2.2. プログラムの実行
 
