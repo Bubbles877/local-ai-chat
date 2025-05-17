@@ -21,7 +21,7 @@
 Environment variables are required.
 
 Create a `.env` file at the project root in your local environment and set the environment variables.  
-See [.env.example](./.env.example) for reference.
+[.env.example](./.env.example) is the template.
 
 Available environment variables:
 
