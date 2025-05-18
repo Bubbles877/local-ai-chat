@@ -23,9 +23,7 @@ class Main:
         logger.debug(f"Settings:\n{self._settings.model_dump_json(indent=2)}")
         logger.debug(f"LLM Settings:\n{self._llm_settings.model_dump_json(indent=2)}")
 
-        self._resource_loader = ResourceLoader(
-            self._settings, enable_logging=self._settings.log_level == "DEBUG"
-        )
+        self._resource_loader = ResourceLoader(self._settings, enable_logging=True)
 
         llm = ChatOllama(
             model=self._llm_settings.name,
@@ -33,9 +31,7 @@ class Main:
             temperature=self._llm_settings.temperature,
         )
         self._llm_chat = LLMChat(
-            llm,
-            self._settings.llm_max_messages,
-            enable_logging=self._settings.log_level == "DEBUG",
+            llm, self._settings.llm_max_messages, enable_logging=True
         )
 
     async def run(self) -> None:
@@ -129,3 +125,5 @@ if __name__ == "__main__":
         asyncio.run(main.run())
     except KeyboardInterrupt:
         logger.info("KeyboardInterrupt: Shutting down...")
+    except Exception as e:
+        logger.error(f"Error: {e}")
