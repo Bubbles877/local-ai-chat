@@ -15,7 +15,7 @@ class UI:
         llm_temperature: Optional[float],
         llm_max_msgs: int,
         llm_instructions: str,
-        on_setting_updated: Callable[[str], None],
+        setting_updated_callback: Callable[[str], None],
     ):
         """初期化
 
@@ -26,7 +26,7 @@ class UI:
             llm_temperature (Optional[float]): LLM が生成する出力のランダム性、創造性
             llm_max_msgs (int): LLM に渡す会話履歴の最大数
             llm_instructions (str): LLM への指示 (システムプロンプト)
-            on_setting_updated (Callable[[str], None]): 設定更新のコールバック
+            setting_updated_callback (Callable[[str], None]): 設定更新のコールバック
         """
         self._msg_example = llm_message_example
         self._chat_callback = chat_callback
@@ -34,7 +34,7 @@ class UI:
         self._llm_temperature = llm_temperature
         self._llm_max_msgs = llm_max_msgs
         self._instructions = llm_instructions
-        self._setting_updated_callback = on_setting_updated
+        self._setting_updated_callback = setting_updated_callback
 
     def launch(self) -> None:
         """UI を起動する"""
