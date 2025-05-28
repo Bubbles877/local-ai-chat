@@ -48,6 +48,13 @@ Available environment variables:
 poetry run python app/main.py
 ```
 
+or
+
+```sh
+.venv/Scripts/activate
+python app/main.py
+```
+
 ## 3.Repository
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)

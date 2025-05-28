@@ -48,6 +48,13 @@
 poetry run python app/main.py
 ```
 
+もしくは
+
+```sh
+.venv/Scripts/activate
+python app/main.py
+```
+
 ## 3. リポジトリ
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
