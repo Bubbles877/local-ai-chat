@@ -100,5 +100,5 @@ class UI:
                         outputs=[input_box, chatbot],
                     )
 
-        ui.launch(inbrowser=True, share=False)
+        ui.launch(inbrowser=True, share=False, pwa=True)
         ui.close()
