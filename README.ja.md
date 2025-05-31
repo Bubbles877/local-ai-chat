@@ -6,7 +6,7 @@
 
 - ローカル AI チャットアプリ
 - [Ollama](https://github.com/ollama/ollama)、[Gradio](https://www.gradio.app/) を利用
-- 外部には一切データを送信しないローカル専用アプリです
+- 外部には一切データを送信しないセキュアなローカル専用アプリです
 
 ![UI](images/ui.png)
 

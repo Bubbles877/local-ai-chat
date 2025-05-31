@@ -6,7 +6,7 @@
 
 - Local AI Chat App
 - Built with [Ollama](https://github.com/ollama/ollama) and [Gradio](https://www.gradio.app/)
-- Runs entirely on your local machine with no external data transfers
+- Secure local-only app with no external data transfers
 
 ![UI](images/ui.png)
 
