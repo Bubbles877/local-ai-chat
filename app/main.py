@@ -107,8 +107,8 @@ class Main:
         msgs: list[AnyMessage] = []
 
         for msg in messages:
-            role = msg["role"]
-            content = str(msg["content"])
+            role = msg.get("role", "")
+            content = str(msg.get("content", ""))
             match role:
                 case "user":
                     msgs.append(HumanMessage(content=content))
