@@ -87,7 +87,10 @@ class UI:
                         label="History",
                         container=True,
                         height=600,
+                        resizable=True,
                         editable="all",
+                        show_copy_button=True,
+                        show_copy_all_button=True,
                     )
                     input_box = gr.Textbox(
                         placeholder="Shift + Enter で改行", show_label=False
