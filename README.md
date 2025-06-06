@@ -10,13 +10,26 @@
 
 ![UI](images/ui.png)
 
-## 2. Usage
+## 2. Key Features
+
+- Local AI chat using Ollama
+  - Secure with no external data transfers
+- System prompt update feature
+  - Can be updated even in the middle of a conversation
+- Feature to set the maximum number of conversation history entries to pass to the LLM
+  - Useful when model performance degrades with longer contexts
+- Feature to pre-input example conversations between user and AI
+  - Useful for guiding the content and length of AI output
+- Conversation history editing feature
+  - Useful for correcting the AI's output when conversations become long, the number of characters increases, or the output deviates from the system prompt's instructions.
+
+## 3. Usage
 
 1. Set up environment variables
 2. Run the app
 3. Chat with the AI via web browser
 
-### 2.1. Environment Variables
+### 3.1. Environment Variables
 
 Environment variables are required.
 
@@ -42,7 +55,7 @@ Available environment variables:
   - File path for the example conversation between user and AI (e.g. `data/llm_message_example.json`)
   - Included in the conversation history as preceding messages
 
-### 2.2. Running the App
+### 3.2. Running the App
 
 ```sh
 poetry run python app/main.py
@@ -55,6 +68,6 @@ or
 python app/main.py
 ```
 
-## 3.Repository
+## 4. Repository
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
