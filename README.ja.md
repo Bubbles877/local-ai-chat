@@ -14,7 +14,7 @@
 
 - Ollama を利用したローカル AI チャット
   - 外部には一切データを送信しない安全性
-- システムプロンプトの更新機能
+- システムプロンプトの設定機能
   - 会話の途中でも更新可能
 - LLM に渡す会話履歴の最大数の設定機能
   - コンテキストが長くなるとモデルの性能が低下する場合に有用
@@ -41,20 +41,20 @@
 
 - LOG_LEVEL
   - ログレベル (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
+- LLM_INSTRUCTION_FILE_PATH
+  - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instruction.txt`)
+- LLM_MESSAGE_EXAMPLE_FILE_PATH
+  - ユーザーと AI の会話例の設定ファイルのパス (e.g. `data/llm_message_example.json`)
+  - 先行するメッセージとして会話履歴に含められる
+- LLM_MAX_MESSAGES
+  - LLM に渡す会話履歴の最大数 (<0: 無制限)
+  - より新しいメッセージを優先に最大数まで渡す
 - LLM_NAME
   - LLM 名 (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
   - LLM の温度 (生成する出力のランダム性、創造性) (0.0-1.0)
-- LLM_MAX_MESSAGES
-  - LLM に渡す会話履歴の最大数 (<0: 無制限)
-  - より新しいメッセージを優先に最大数まで渡す
-- LLM_INSTRUCTION_FILE_PATH
-  - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instruction.txt`)
-- LLM_MESSAGE_EXAMPLE_FILE_PATH
-  - ユーザーと AI の会話例の設定ファイルのパス (e.g. `data/llm_message_example.json`)
-  - 先行するメッセージとして会話履歴に含められる
 
 ### 3.2. プログラムの実行
 
