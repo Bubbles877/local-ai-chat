@@ -6,7 +6,8 @@
 
 - ローカル AI チャットアプリ
 - [Ollama](https://github.com/ollama/ollama)、[Gradio](https://www.gradio.app/) を利用
-- 外部には一切データを送信しないセキュアなローカル専用アプリです
+- 手元の PC 内で直接生成 AI を動かしてセキュアにチャットができる、ローカル専用アプリです
+- 外部にはデータを一切送信しないので、例えば機密情報みたいなものも安心して扱えます
 
 ![UI](images/ui.png)
 
@@ -69,6 +70,14 @@ poetry run python app/main.py
 python app/main.py
 ```
 
-## 4. リポジトリ
+## 4. 依存モジュール
+
+- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
+
+## 5. 対応環境
+
+[pyproject.toml](./pyproject.toml) を参照してください。
+
+## 6. リポジトリ
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)

@@ -6,7 +6,8 @@
 
 - Local AI Chat App
 - Built with [Ollama](https://github.com/ollama/ollama) and [Gradio](https://www.gradio.app/)
-- Secure local-only app with no external data transfers
+- A local-only app that runs generative AI directly on your PC for secure chat
+- It does not send any data externally, so you can handle sensitive information with confidence
 
 ![UI](images/ui.png)
 
@@ -68,6 +69,14 @@ Or
 python app/main.py
 ```
 
-## 4. Repository
+## 4. Dependencies
+
+- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
+
+## 5. Supported Environments
+
+Please see [pyproject.toml](./pyproject.toml).
+
+## 6. Repository
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
