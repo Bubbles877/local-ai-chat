@@ -1,5 +1,8 @@
 import asyncio
+import json
+import os
 import sys
+from datetime import datetime
 
 import gradio as gr
 from langchain_core.messages import AIMessage, AnyMessage, HumanMessage, SystemMessage
@@ -37,19 +40,20 @@ class Main:
     async def run(self) -> None:
         """実行する"""
         llm_instructions = await self._resource_loader.load_plane_text(
-            self._settings.llm_instruction_file_path
+            self._settings.llm_instructions_file_path
         )
         self._llm_chat.configure(llm_instructions)
 
-        llm_msg_example = self._to_ui_message(
-            await self._resource_loader.load_llm_message_example(
-                self._settings.llm_message_example_file_path
+        chat_history = self._to_ui_messages(
+            await self._resource_loader.load_chat_history(
+                self._settings.chat_history_file_path
             )
         )
 
         ui = UI(
-            llm_msg_example,
+            chat_history,
             self._chat,
+            self._save_chat_history,
             self._llm_settings.name,
             self._llm_settings.temperature,
             self._settings.llm_max_messages,
@@ -86,8 +90,21 @@ class Main:
         # "" を返すと入力ボックスがクリアされる
         return "", history
 
+    def _save_chat_history(self, history: list[gr.MessageDict]) -> None:
+        try:
+            os.makedirs("data", exist_ok=True)
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            file_path = os.path.join("data", f"chat_history_{timestamp}.json")
+            with open(file_path, "w", encoding="utf-8") as file:
+                json.dump(
+                    self._to_json_messages(history), file, ensure_ascii=False, indent=2
+                )
+            logger.info(f"Chat history saved to {file_path}")
+        except Exception as e:
+            logger.error(f"Failed to save chat history: {e}")
+
     @staticmethod
-    def _to_ui_message(messages: list[LLMMessage]) -> list[gr.MessageDict]:
+    def _to_ui_messages(messages: list[LLMMessage]) -> list[gr.MessageDict]:
         msgs: list[gr.MessageDict] = []
 
         for msg in messages:
@@ -101,6 +118,18 @@ class Main:
                     logger.warning(f"Unknown role: {role}")
 
         return msgs
+
+    @staticmethod
+    def _to_json_messages(
+        messages: list[gr.MessageDict],
+    ) -> dict[str, list[LLMMessage]]:
+        msgs: list[LLMMessage] = []
+
+        for msg in messages:
+            role = msg.get("role", "")
+            content = str(msg.get("content", ""))
+            msgs.append({"role": role, "content": content})
+        return {"messages": msgs}
 
     @staticmethod
     def _to_llm_messages(messages: list[gr.MessageDict]) -> list[AnyMessage]:

@@ -11,9 +11,9 @@ class Settings(BaseSettings):
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
-    llm_instruction_file_path: Optional[str] = None
-    llm_message_example_file_path: Optional[str] = None
+    chat_history_file_path: Optional[str] = None
     llm_max_messages: int = -1
+    llm_instructions_file_path: Optional[str] = None
 
     model_config = SettingsConfigDict(
         extra="ignore",

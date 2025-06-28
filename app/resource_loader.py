@@ -50,29 +50,27 @@ class ResourceLoader:
 
         return txt
 
-    async def load_llm_message_example(
-        self, file_path: Optional[str]
-    ) -> list[LLMMessage]:
-        """設定ファイルから ユーザーと AI の会話例を読み込む
+    async def load_chat_history(self, file_path: Optional[str]) -> list[LLMMessage]:
+        """ファイルからユーザーと AI の会話履歴 (会話例) を読み込む
 
         Returns:
             list[gr.MessageDict]: 会話例
         """
-        msgs: list[LLMMessage] = []
+        history: list[LLMMessage] = []
 
         if not file_path:
-            logger.info("Message example file path not set")
-            return msgs
+            logger.info("Chat history file path not set")
+            return history
 
         if not os.path.isfile(file_path):
-            logger.warning(f"Message example file not found: {file_path}")
-            return msgs
+            logger.warning(f"Chat history file not found: {file_path}")
+            return history
 
         try:
             async with aiofiles.open(file_path, "r", encoding="utf-8") as file:
-                msg_dict: dict = json.loads(await file.read())
-                msgs = msg_dict.get("messages", [])
+                history_dict: dict = json.loads(await file.read())
+                history = history_dict.get("messages", [])
         except Exception as e:
-            logger.error(f"Failed to load message example: {e}")
+            logger.error(f"Failed to load chat history: {e}")
 
-        return msgs
+        return history

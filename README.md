@@ -15,14 +15,16 @@
 
 - Local AI chat using Ollama
   - Secure with no external data transfers
-- Feature to set the system prompt
-  - Can be updated even in the middle of a conversation
-- Feature to set the maximum number of conversation history entries to pass to the LLM
-  - Useful when model performance degrades with longer contexts
-- Feature to pre-input example conversations between user and AI
-  - Useful for guiding the content and length of AI output
+- User-AI conversation history (examples) pre-input feature
+  - Useful for guiding the content and length of the AI’s output
+- Conversation history file-save feature
+  - When specified as the pre-input history, allows you to resume from the previous conversation
 - Conversation history editing feature
   - Useful for correcting the AI's output when conversations become long, the number of characters increases, or the output deviates from the system prompt's instructions.
+- Feature for setting the maximum number of conversation history entries to pass to the LLM
+  - Useful when model performance degrades with longer contexts
+- System-prompt setting feature
+  - Can be updated even in the middle of a conversation
 
 ## 3. Usage
 
@@ -41,14 +43,14 @@ Available environment variables:
 
 - LOG_LEVEL
   - Log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
-- LLM_INSTRUCTION_FILE_PATH
-  - File path for the system prompt file used as instructions for the LLM (e.g. `data/llm_instruction.txt`)
-- LLM_MESSAGE_EXAMPLE_FILE_PATH
-  - File path for the example conversation between user and AI (e.g. `data/llm_message_example.json`)
-  - Included in the conversation history as preceding messages
+- CHAT_HISTORY_FILE_PATH
+  - Path to the user-AI conversation history (examples) file (e.g. `data/chat_history.json`)
+  - Included as preceding messages passed to both the UI and the LLM
 - LLM_MAX_MESSAGES
-  - Maximum number of messages to include in the conversation history passed to the LLM (<0: unlimited)
+  - Maximum number of messages to pass to the LLM (<0: unlimited)
   - The most recent messages are prioritized up to the maximum count
+- LLM_INSTRUCTIONS_FILE_PATH
+  - Path to the system-prompt file used as instructions for the LLM (e.g. `data/llm_instructions.txt`)
 - LLM_NAME
   - Name of the LLM (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
