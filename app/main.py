@@ -24,7 +24,7 @@ class Main:
         self._setup_logger(self._settings.log_level)
 
         logger.debug(f"Settings:\n{self._settings.model_dump_json(indent=2)}")
-        logger.debug(f"LLM Settings:\n{self._llm_settings.model_dump_json(indent=2)}")
+        logger.debug(f"LLM settings:\n{self._llm_settings.model_dump_json(indent=2)}")
 
         self._resource_loader = ResourceLoader(enable_logging=True)
 
