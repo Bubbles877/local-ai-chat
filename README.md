@@ -15,20 +15,20 @@
 
 - Local AI chat using Ollama
   - Secure with no external data transfers
-- User-AI conversation history (examples) pre-input feature
+- Pre-input of user–AI conversation history (example dialogues)
   - Useful for guiding the content and length of the AI’s output
-- Conversation history file-save feature
-  - When specified as the pre-input history, allows you to resume from the previous conversation
-- Conversation history editing feature
-  - Useful for correcting the AI's output when conversations become long, the number of characters increases, or the output deviates from the system prompt's instructions.
-- Feature for setting the maximum number of conversation history entries to pass to the LLM
+- Save conversation history to a file
+  - When specified as the pre-input history, you can resume from the previous conversation
+- Edit conversation history
+  - Useful for keeping AI’s output on track when conversations become long, the number of characters increases, or the output deviates from the system prompt's instructions.
+- Set the maximum number of conversation-history entries to pass to the LLM
   - Useful when model performance degrades with longer contexts
-- System-prompt setting feature
+- Set the system prompt
   - Can be updated even in the middle of a conversation
 
 ## 3. Usage
 
-1. Set up environment variables
+1. Set up the required environment variables
 2. Run the app
 3. Chat with the AI via web browser
 
@@ -52,11 +52,11 @@ Available environment variables:
 - LLM_INSTRUCTIONS_FILE_PATH
   - Path to the system-prompt file used as instructions for the LLM (e.g. `data/llm_instructions.txt`)
 - LLM_NAME
-  - Name of the LLM (e.g. qwen2.5:32b, gemma3:27b)
+  - LLM model name (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
   - URL of the LLM API (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
-  - Sampling temperature of the LLM (randomness and creativity of the generated output) (0.0-1.0)
+  - Diversity of LLM Outputs (0.0–1.0)
 
 ### 3.2. Running the App
 
@@ -71,14 +71,15 @@ Or
 python app/main.py
 ```
 
-## 4. Dependencies
-
-- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
-
-## 5. Supported Environments
+## 4. Dependencies & Verified Versions
 
 Please see [pyproject.toml](./pyproject.toml).
 
-## 6. Repository
+We also use the following:
+
+- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
+- [python-utilities/env_settings at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/env_settings)
+
+## 5. Repository
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)

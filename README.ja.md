@@ -15,16 +15,16 @@
 
 - Ollama を利用したローカル AI チャット
   - 外部には一切データを送信しない安全性
-- ユーザーと AI の会話履歴 (会話例) の事前入力機能
+- ユーザーと AI の会話履歴 (会話例) の事前入力
   - AI の出力の内容、文字数などの誘導に有用
-- 会話履歴のファイル保存機能
+- 会話履歴のファイル保存
   - 事前入力の会話履歴として指定すると、前回の会話の続きから再開
-- 会話履歴の編集機能
+- 会話履歴の編集
   - 会話が長くなると文字数が増えて来たり、システムプロンプトの指示からブレて来るケースなど、  
     AI の出力を軌道修正するのに有用
-- LLM に渡す会話履歴の最大数の設定機能
+- LLM に渡す会話履歴の最大数の設定
   - コンテキストが長くなるとモデルの性能が低下する場合に有用
-- システムプロンプトの設定機能
+- システムプロンプトの設定
   - 会話の途中でも更新可能
 
 ## 3. 使い方
@@ -37,7 +37,7 @@
 
 環境変数の設定が必要です。
 
-ローカル環境ではプロジェクトのルートに`.env`を作成して環境変数を設定してください。  
+ローカル環境ではプロジェクトのルートに `.env` を作成して環境変数を設定してください。  
 [.env.example](./.env.example) がテンプレートです。
 
 以下の環境変数があります。
@@ -53,11 +53,11 @@
 - LLM_INSTRUCTIONS_FILE_PATH
   - LLM への指示 (システムプロンプト) の設定ファイルのパス (e.g. `data/llm_instructions.txt`)
 - LLM_NAME
-  - LLM 名 (e.g. qwen2.5:32b, gemma3:27b)
+  - LLM のモデル名 (e.g. qwen2.5:32b, gemma3:27b)
 - LLM_ENDPOINT
   - LLM API の URL (e.g. `http://localhost:11434/`)
 - LLM_TEMPERATURE
-  - LLM の温度 (生成する出力のランダム性、創造性) (0.0-1.0)
+  - LLM の出力の多様性 (0.0-1.0)
 
 ### 3.2. プログラムの実行
 
@@ -72,14 +72,15 @@ poetry run python app/main.py
 python app/main.py
 ```
 
-## 4. 依存モジュール
-
-- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
-
-## 5. 対応環境
+## 4. 依存関係 & 動作確認済みバージョン
 
 [pyproject.toml](./pyproject.toml) を参照してください。
 
-## 6. リポジトリ
+また、以下を利用しています。
+
+- [python-utilities/llm_chat at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/llm_chat)
+- [python-utilities/env_settings at main · Bubbles877/python-utilities](https://github.com/Bubbles877/python-utilities/tree/main/env_settings)
+
+## 5. リポジトリ
 
 - [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
