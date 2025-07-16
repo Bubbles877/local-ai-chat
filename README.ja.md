@@ -83,4 +83,4 @@ python app/main.py
 
 ## 5. リポジトリ
 
-- [Bubbles877/local-ai-chat](https://github.com/Bubbles877/local-ai-chat)
+- [Bubbles877/local-ai-chat: Local AI Chat App / ローカル AI チャットアプリ](https://github.com/Bubbles877/local-ai-chat)
