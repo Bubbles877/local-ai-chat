@@ -16,7 +16,5 @@ class Settings(BaseSettings):
     llm_instructions_file_path: Optional[str] = None
 
     model_config = SettingsConfigDict(
-        extra="ignore",
-        env_file=".env",
-        env_file_encoding="utf-8",
+        extra="ignore", env_file=".env", env_file_encoding="utf-8"
     )
