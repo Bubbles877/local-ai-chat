@@ -84,3 +84,7 @@ python app/main.py
 ## 5. リポジトリ
 
 - [Bubbles877/local-ai-chat: Local AI Chat App / ローカル AI チャットアプリ](https://github.com/Bubbles877/local-ai-chat)
+
+## 6. 関連・参考
+
+- [🛡 Ollama × Gradio で作る！ セキュアなローカル専用 AI チャットアプリ](https://zenn.dev/bubbles/articles/29e546ae7ee16d)

@@ -83,3 +83,7 @@ We also use the following:
 ## 5. Repository
 
 - [Bubbles877/local-ai-chat: Local AI Chat App / ローカル AI チャットアプリ](https://github.com/Bubbles877/local-ai-chat)
+
+## 6. References
+
+- [🛡 Build a Secure Local-Only AI Chat App with Ollama and Gradio!](https://zenn.dev/bubbles/articles/29e546ae7ee16d)
